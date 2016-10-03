@@ -1,0 +1,110 @@
+Problem A:
+
+First algorithm:
+
+function fixedPointOfArray(array) {
+
+    fixedPoint = "No"
+    i = 0
+
+    while i < array.length AND fixedPoint == "No"
+    do
+        if (i == array[i])
+            fixedPoint = i
+        i++
+    done
+
+    return fixedPoint
+}
+
+Correctness argument:
+
+We start off assuming there is no fixed point (variable set to 'No'), and the
+array pointer at the first element (0). The loop condition states that the loop
+will only end under two conditions, either i = array.length (ie we've reached
+the end of the array) or the fixed point is no longer 'No', ie we've found a
+fixed point. Implying each element is checked in turn, unless a value has
+already been found. Also each loop iteration will certainly examine a new element
+since the pointer is incramented at the end of every iteration.
+
+In summary, each element is checked, and only if a fixed point is found is the
+fixed point variable altered, and once found, it isn't altered againt
+and this is what gets returned.
+
+Operations:
+
+The number of operations (here considering the comparison within the loop body
+on line 12) in the worst case senario is n. Where n is the number of elements in
+the array. Since the worst case is either that there is no fixed point, or the
+fixed point is the last element, requiring n comparisons, one for each element
+including the last.
+
+
+Improved Algorithm:
+
+function fixedPointOfArray(array) {
+
+    lowerBound = 0
+    upperBound = array.length
+
+    while lowerBound != upperBound - 1
+        pointer = FLOOR[(lowerBound + upperBound) / 2]
+
+        if (array[pointer] == pointer)
+            return pointer
+        else if (array[pointer] > pointer)
+            upperBound = pointer
+        else
+            lowerBound = pointer
+
+    return 'No'
+}
+
+Correctness argument:
+
+We start off at the extremes of the array, the start at the end with the lower
+and upper pointers. We compute the value in the middle (truncated).
+
+If the array value a[p] at pointer value p is greater that p we can dismiss all
+array values greater than it (all values to the right) for the following reason
+
+here a[p] > p
+we know a[p+1] = a[p] + k where k is an integer >= 1 (since the array is acending
+and values are distict).
+
+So  a[p] = a[p+1] - k
+    a[p] > p
+    a[p+1] - k > p
+    a[p+1] > p + k
+So a[p+1] is greater than p + 1 (since k is at least 1)
+By induction each a[p'] for p' > p will have a[p'] > p' so we can rule out all
+elements the the right of the array. We do this by setting the upperBound to now
+be the pointer value.
+
+By a similar arguemnt if p < a[p], all pointer values less than p will be less than
+their corresponding array element a[p] so we can dismiss all a[p] to the left of
+the pointer value.
+
+We only stop under 2 conditions, firstly we found it (and returned it) or when
+the upper bound is only one greater than the lower bound. By the arguments above
+the fixed point would have to be between lowerBound and upperBound but being integers
+this is not possible, hereby it does not exist.
+
+Operations:
+
+In the worst case scenario here, the fixed point doesn't exist. So 2 comparison
+operations must be done per loop iteration. So the question is how many loop
+iterations.
+
+We keep iterating until upperBound - lowerBound = 1, each time halving the range.
+To start with upperBound - lowerBound = array.length = n
+So  n /  2^#iterations = 1
+    2^#iterations = n
+    log_2(n) = #iterations   (log base 2 of n = number iterations)
+
+Since we're doing 2 comparisons per loop the number of operations becomes
+
+2*log_2(n)
+
+Which with greater than about 4 array items is far fewer operations than the
+first algorithm.
