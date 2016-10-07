@@ -1,0 +1,61 @@
+	How to write, compile, debug and run C programs on Linux
+	========================================================
+
+There are some prompts below, but you should add anything else you think
+will be useful.
+
+Useful sources of information
+=============================
+The man page for gcc (man gcc)
+
+Writing C programs
+==================
+
+printf command:
+
+Access to information by typing `man 3 printf`
+
+
+Compiling C programs
+====================
+-std compiler parameter - Dictates the language standard the compiler should use
+-Wall compiler parameter - "enables all the warnings about constructions that
+some users consider questionable" - gcc man page. Essentially displays all
+warnings as well as errors.
+
+Errors from omitting #include line:
+
+HelloWorld.c: In function ‘main’:
+HelloWorld.c:5:3: warning: implicit declaration of function ‘printf’
+ [-Wimplicit-function-declaration]
+   printf("Hello world!\n");
+   ^
+HelloWorld.c:5:3: warning: incompatible implicit declaration of built-in
+ function ‘printf’ [enabled by default]
+
+
+Ie printf is not recognized (or rather compiler has no access to the definition
+of printf)
+
+Linking C programs
+==================
+
+Need to specify a linker flag of -lm to compiler
+
+Running C programs
+==================
+
+run C program prog by typing ./prog
+
+
+Comparing output from C and Java programs
+=========================================
+
+The only difference was the number of decimal places the mean salary was quoted
+to.
+Java:	24626.666666666668
+C:		24626.666667
+
+Though the code doesn't explicitly do any rounding. So Java's output
+is slighty more accurate. Though slightly misleading since the
+the correct answer has the 6 recurring,.
