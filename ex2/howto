@@ -42,6 +42,10 @@ Linking C programs
 
 Need to specify a linker flag of -lm to compiler
 
+-including only brings in the header file including method headers with no
+ definitions,
+-linking actually links to the method definitions for use in execution
+
 Running C programs
 ==================
 
@@ -57,5 +61,5 @@ Java:	24626.666666666668
 C:		24626.666667
 
 Though the code doesn't explicitly do any rounding. So Java's output
-is slighty more accurate. Though slightly misleading since the
+is slightly more accurate. Though slightly misleading since the
 the correct answer has the 6 recurring,.

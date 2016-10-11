@@ -7,8 +7,16 @@ int main(int argc, char **argv)
         numToLowerCase = 0,
         chr;
 
-    char *inputFilename = "input.txt",
-         *outputFilename = "output.txt";
+    char inputFilename[20],
+         outputFilename[20];
+
+    // Get filenames for input and output from user
+    printf("Enter input file name (max 20chars): ");
+    scanf("%s", &inputFilename);
+
+    printf("Enter output file name (max 20chars): ");
+    scanf("%s", &outputFilename);
+
     printf("\n");
 
     // Open input and output file streams
