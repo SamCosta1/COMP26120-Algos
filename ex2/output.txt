@@ -1,0 +1,3 @@
+HElLO WORLD heLlo world
+
+Read 24 characters in total, 10 converted toupper-case, 14 to lower case

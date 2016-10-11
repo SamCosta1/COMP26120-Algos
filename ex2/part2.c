@@ -7,38 +7,50 @@ int main(int argc, char **argv)
         numToLowerCase = 0,
         chr;
 
-    char *filename = "input.txt";
+    char *inputFilename = "input.txt",
+         *outputFilename = "output.txt";
     printf("\n");
+
+    // Open input and output file streams
 
     // ---- Taken from SalaryAnalysis.c --- //
 
-    // A stream for getting data from the user.
-    FILE *stream= fopen(filename, "r");
-    if (!stream) {
-        fprintf(stderr, "can't open %s for reading\n", filename);
+    FILE *inputStream= fopen(inputFilename, "r");
+    if (!inputStream) {
+        fprintf(stderr, "can't open %s \n", inputFilename);
         exit(-1);
     }
 
+    FILE *outputStream= fopen(outputFilename, "w");
+    if (!outputStream) {
+        fprintf(stderr, "can't open %s \n", outputFilename);
+        exit(-1);
+    }
+
+
     // ------------------------------- //
 
-    // Loop through input until terminated
-    while ((chr = fgetc(stream)) != EOF) {
+    // Loop through input until end of file
+    while ((chr = fgetc(inputStream)) != EOF) {
         if (isupper(chr)) {
             numToUpperCase++;
-            putchar(tolower(chr));
+            fprintf(outputStream, "%c", tolower(chr));
         }
         else {
             numToLowerCase++;
-            putchar(toupper(chr));
+            fprintf(outputStream, "%c", toupper(chr));
         }
     }
 
-    printf( "\nRead %d characters in total, %d converted to"
+    // print out summary to file
+    fprintf(outputStream,
+            "\nRead %d characters in total, %d converted to"
             "upper-case, %d to lower case\n",
             numToUpperCase + numToLowerCase,
             numToUpperCase,
             numToLowerCase);
 
-    fclose(stream);
+    fclose(inputStream);
+    fclose(outputStream);
     return 0;
 }
