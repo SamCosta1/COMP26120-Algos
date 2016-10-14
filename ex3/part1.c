@@ -4,7 +4,7 @@
 int largest (int arrayLength, int* array) {
     if (array == NULL || arrayLength < 1) {
         printf("Invalid array parameter\n");
-        exit(-1);
+        return 0;
     }
 
     // Start with assuming largest is first in array and loop through
@@ -33,4 +33,6 @@ int main(int argc, char **argv) {
     printf("Test5: %d\n", largest(1, test5));
     printf("Test-error: %d\n", largest(0, test6));
     printf("Test-error: %d\n", largest(6, NULL));
+
+    return 0;
 }
