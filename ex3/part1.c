@@ -2,7 +2,7 @@
 #include <stdlib.h>
 // Find largest integer in array and return it
 int largest (int arrayLength, int* array) {
-    if (array == NULL) {
+    if (array == NULL || arrayLength < 1) {
         printf("Invalid array parameter\n");
         exit(-1);
     }
@@ -23,10 +23,14 @@ int main(int argc, char **argv) {
     int test2[] = {0,0,0,0,0,0};
     int test3[] = {-1,-123,-12312,-2,1,0,0,0,0};
     int test4[] = {4034,0,0,0,0,0,1,1};
+    int test5[] = {-494};
+    int test6[] = {};
 
     printf("Test1: %d\n", largest(9, test1));
     printf("Test2: %d\n", largest(6, test2));
     printf("Test3: %d\n", largest(9, test3));
     printf("Test4: %d\n", largest(8, test4));
-    printf("Test5: %d\n", largest(6, NULL));
+    printf("Test5: %d\n", largest(1, test5));
+    printf("Test-error: %d\n", largest(0, test6));
+    printf("Test-error: %d\n", largest(6, NULL));
 }
