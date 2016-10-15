@@ -24,3 +24,9 @@ test4:
 	./part4 -f
 	./part4
 	./part4 -12 -f
+
+test5:
+	./part5 part5test1.txt
+	./part5 part5test2.txt
+	./part5 part5test3.txt
+	./part5 part5test4.txt
