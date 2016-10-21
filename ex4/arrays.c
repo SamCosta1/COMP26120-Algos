@@ -25,12 +25,16 @@ int main(int argc, char **argv) {
   struct person *people[HOW_MANY];
   int i;
 
-  for (i = 0; i < HOW_MANY; i++)   {
+  for (i = 0; i < HOW_MANY; i++)  {
     insert (people, names[i], ages[i]);
   }
 
-  for (i = 0; i < HOW_MANY; i++)   {
+  for (i = 0; i < HOW_MANY; i++)  {
   	printf("%-7s : %d\n", people[i]->name, people[i]->age);
+  }
+
+  for (i = 0; i < HOW_MANY; i++)  {
+    free(people[i]);
   }
 
   return 0;
