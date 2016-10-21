@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Convert celcius to farenheight
 float c2f (float c) {
 
     if (c <= -273.15){
@@ -11,6 +12,7 @@ float c2f (float c) {
     return (c * 9/5) + 32;
 }
 
+// Convert farenheight to celcius
 float f2c (float f) {
     float c = (f - 32) * 5/9;
 
