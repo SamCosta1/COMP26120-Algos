@@ -12,12 +12,37 @@ struct person {
 	struct person *next;
 };
 
-struct person * insert(struct person *people, char *name, int age) {
+struct person * insert_start(struct person *people, char *name, int age) {
 	struct person *current = (struct person *)malloc(sizeof(struct person));
 	current->name = name;
     current->age = age;
 	current->next = people;
 	return current;
+}
+
+struct person * insert_end(struct person *people, char *name, int age) {
+	struct person *current = (struct person *)malloc(sizeof(struct person));
+
+	if (current == NULL) {
+		printf("Something went wrong with memory");
+		exit(-1);
+	}
+	
+	current->name = name;
+    current->age = age;
+
+	if (people == NULL) {
+		current->next = people;
+		return current;
+	} else {
+		struct person *nextPerson = people;
+		while (nextPerson->next != NULL) {
+	        nextPerson = nextPerson->next;
+		}
+
+		nextPerson->next = current;
+		return people;
+	}
 }
 
 int main(int argc, char **argv) {
@@ -27,7 +52,7 @@ int main(int argc, char **argv) {
   int i;
 
   for (i = 0; i < HOW_MANY; i++)  {
-    people = insert (people, names[i], ages[i]);
+    people = insert_end(people, names[i], ages[i]);
   }
 
   nextPerson = people;
