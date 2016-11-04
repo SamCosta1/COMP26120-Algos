@@ -48,7 +48,8 @@ struct person * insert_sorted(struct person *people, char *name, int age) {
 	} else {
 	  
 		struct person *nextPerson = people;
-		while (nextPerson->next != NULL && personCompare(nextPerson->next,current) < 0) {
+		while (nextPerson->next != NULL
+		       && personCompare(nextPerson->next,current) < 0) {
 		  nextPerson = nextPerson->next;
 		}
 		
