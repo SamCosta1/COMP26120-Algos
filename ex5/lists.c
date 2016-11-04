@@ -26,12 +26,17 @@ struct person * insert_start(struct person *people, char *name, int age) {
 	return current;
 }
 
-int personCompare(struct person *person1, struct person *person2) {
-
+int compare_people_by_name(struct person *person1, struct person *person2) {
 	return strcmp(person1->name, person2->name);
 }
 
-struct person * insert_sorted(struct person *people, char *name, int age) {
+int compare_people_by_age(struct person *person1, struct person *person2) {
+	return person1->age - person2->age;
+}
+
+struct person * insert_sorted(struct person *people, char *name, int age,
+                              int (*compare_people)(struct person *,
+                                                    struct person *)) {
 	struct person *current = (struct person *)malloc(sizeof(struct person));
 
 	if (current == NULL) {
@@ -42,14 +47,14 @@ struct person * insert_sorted(struct person *people, char *name, int age) {
 	current->name = name;
   current->age = age;
 
-	if (people == NULL || personCompare(people, current) > 0) {
+	if (people == NULL || (*compare_people)(people, current) > 0) {
 		current->next = people;
 		return current;
 	} else {
 	  
 		struct person *nextPerson = people;
 		while (nextPerson->next != NULL
-		       && personCompare(nextPerson->next,current) < 0) {
+		       && (*compare_people)(nextPerson->next,current) < 0) {
 		  nextPerson = nextPerson->next;
 		}
 		
@@ -94,21 +99,20 @@ struct person * insert_end(struct person *people, char *name, int age) {
 }
 
 int main(int argc, char **argv) {
-
   struct person *people = NULL;
   struct person *nextPerson;
   int i;
 
   for (i = 0; i < HOW_MANY; i++)  {
-    people = insert_sorted(people, names[i], ages[i]);
+    people = insert_sorted(people, names[i], ages[i], &compare_people_by_age);
   }
 
   nextPerson = people;
   for (i = 0; i < HOW_MANY; i++)  {
   	printf("%-7s : %d\n", nextPerson->name, nextPerson->age);
-	struct person *tempNextPerson = nextPerson->next;
-	free(nextPerson);
-	nextPerson = tempNextPerson;
+	  struct person *tempNextPerson = nextPerson->next;
+	  free(nextPerson);
+	  nextPerson = tempNextPerson;
   }
 
   return 0;
