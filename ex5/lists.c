@@ -35,15 +35,15 @@ typedef struct person {
 void makeStaffOrStudent(Person *thisPerson, PersonType type, char * info) {
 	switch (type) {
 		case student:
-			thisPerson->info.courseTitle = info;
-			break;
+		     thisPerson->info.courseTitle = info;
+		  	 break;
 		case staff:
-			thisPerson->info.roomNumber = info;
-			break;
+			 thisPerson->info.roomNumber = info;
+			 break;
 		case neither:
-			thisPerson->info.roomNumber = NULL;
-			thisPerson->info.courseTitle = NULL;
-			break;
+			 thisPerson->info.roomNumber = NULL;
+			 thisPerson->info.courseTitle = NULL;
+			 break;
 	}
 	thisPerson->personType = type;
 }
@@ -52,19 +52,19 @@ void printPerson(Person *p2person) {
 	Person thisPerson = *p2person;
 	switch (thisPerson.personType) {
 		case student:
-			printf("Student name: %-7s | Age: %3d | Course: %s\n",
-	               thisPerson.name, thisPerson.age,
-				   thisPerson.info.courseTitle);
+			 printf("Student name: %-7s | Age: %3d | Course: %s\n",
+	                thisPerson.name, thisPerson.age,
+			 	    thisPerson.info.courseTitle);
 			break;
 		case staff:
-			printf("Staff name:   %-7s | Age: %3d | Room: %s\n",
-	               thisPerson.name, thisPerson.age,
-				   thisPerson.info.roomNumber);
-			break;
+			 printf("Staff name:   %-7s | Age: %3d | Room: %s\n",
+	                thisPerson.name, thisPerson.age,
+				    thisPerson.info.roomNumber);
+			 break;
 		case neither:
-			printf("Person name:  %-7s | Age: %3d |\n",
-	               thisPerson.name, thisPerson.age);
-			break;
+			 printf("Person name:  %-7s | Age: %3d |\n",
+	                thisPerson.name, thisPerson.age);
+			 break;
 	}
 }
 
@@ -76,8 +76,9 @@ Person * insert_start(Person *people, char *name, int age, PersonType type,
 		printf("Something went wrong with memory");
 		exit(-1);
 	}
+
 	current->name = name;
-  	current->age = age;
+    current->age = age;
 	current->next = people;
 
 	makeStaffOrStudent(current, type, info);
@@ -106,35 +107,22 @@ Person * insert_sorted(Person *people, char *name, int age, PersonType type,
 	}
 
 	current->name = name;
-  	current->age = age;
+    current->age = age;
 	current->next = NULL;
 
 	makeStaffOrStudent(current, type, info);
 
-	if (people == NULL || (*compare_people)(people, current) > 0) {
-		current->next = people;
-		return current;
-	} else {
+	Person **ptr2ptr = &people;
 
-		Person *nextPerson = people;
-		while (nextPerson->next != NULL
-		       && (*compare_people)(nextPerson->next,current) < 0) {
-			nextPerson = nextPerson->next;
-		}
-
-		if (nextPerson->next == NULL) {
-		  nextPerson->next = current;
-		} else {
-		  // The current list is,  nextPerson ---> nextPerson.next
-		  // we need               nextPerson ---> current ---> nxtPerson.next
-		  // ie current needs to be insterted in the middle
-		  Person *tempPerson = nextPerson->next;
-		  nextPerson->next = current;
-		  current->next = tempPerson;
-		}
-
-		return people;
+	while (*ptr2ptr != NULL && (*compare_people)(*ptr2ptr,current) < 0){
+		ptr2ptr = &((*ptr2ptr)->next);
 	}
+
+	current->next = *ptr2ptr;
+	(*ptr2ptr) = current;
+
+	return people;
+
 }
 
 Person * insert_end(Person *people, char *name, int age, PersonType type,
