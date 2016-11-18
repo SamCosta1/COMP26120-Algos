@@ -1,7 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+/*
 
+
+
+TODO Input validation shit
+
+
+
+
+
+*/
 typedef enum {
     question,
     object
@@ -51,7 +61,6 @@ void treePrint(Node *root) {
     } else {
         printf("%s\n", root->data.name);
     }
-
 }
 
 Node * createBaseNode(char *name) {
@@ -109,7 +118,7 @@ void makeGuess(Node *node) {
     else {
         printf("What were you thinking of?\n");
         char *userAns = getRawInput();
-        printf("Can you giveme a question about a %s to differentiate between"
+        printf("Can you give me a question about a %s to differentiate between"
                " it, and a %s?\n", userAns, node->data.name);
         char *newQuestion = getRawInput();
         printf("What is the answer for %s?\n", userAns);
@@ -144,18 +153,96 @@ Node * askQuestion(Node *node) {
     }
 }
 
-int main(int argc, char **argv) {
-    Node *tree = constructInitialTree();
+void treePrintToFile(Node *root, FILE *outputStream) {
+    if (root == NULL)
+        return;
+    else if (root->type == question) {
+        fprintf(outputStream, "question:%s\n", root->data.question);
+        treePrintToFile(root->yes, outputStream);
+        treePrintToFile(root->no, outputStream);
+    } else {
+        fprintf(outputStream, "object:%s\n", root->data.name);
+    }
+}
 
+void saveToFile(char *fileName, Node *root) {
+    FILE *outputStream = fopen(fileName, "w");
+    if (!outputStream) {
+        fprintf(stderr, "can't open %s \n", fileName);
+        exit(-1);
+    }
+    treePrintToFile(root, outputStream);
+    fclose(outputStream);
+}
+
+char *input;
+Node * treeReadFromFile(FILE *stream) {
+    char data[buffer_size];
+    fgets(data, buffer_size, stream);
+
+    if (strcmp(data,"") == 0) {
+        return NULL;
+    }
+
+    Node *ptr = malloc(sizeof(Node));
+
+    char subString[8];
+    // check if line starts with 'question:'
+    sscanf(data, "%[^:]", subString);
+    if (strcmp(subString, "question") == 0) { // Line is question
+        input = malloc(buffer_size);
+        sscanf(data, "%*[^:]:%[^\n]", input);
+
+            ptr->type=question;
+
+        ptr->data.question = input;
+        ptr->yes = treeReadFromFile(stream);
+        ptr->no = treeReadFromFile(stream);
+    } else { // Line is object
+        char subString[8];
+        // check if line starts with 'object:'
+        sscanf(data, "%[^:]", subString);
+
+        if (strcmp(subString, "object") == 0) {
+            input = malloc(buffer_size);
+            sscanf(data, "%*[^:]:%[^\n]", input);
+            ptr->type=object;
+            ptr->data.name = input;
+            ptr->yes = NULL;
+            ptr->no = NULL;
+        }
+    }
+
+    return ptr;
+
+}
+
+Node * loadFromFile(char *fileName) {
+    FILE *inputStream = fopen(fileName, "r");
+    if (!inputStream) {
+        fprintf(stderr, "can't open %s \n", fileName);
+        exit(-1);
+    }
+    Node *tree = treeReadFromFile(inputStream);
+    fclose(inputStream);
+    return tree;
+}
+
+int main(int argc, char **argv) {
+    Node *tree = loadFromFile("pangolinsTree.txt");
+    //Node *tree = constructInitialTree();
+    treePrint(tree);
     int finished = false;
     Node *currentNode = tree;
     while(!finished) {
         if (currentNode->type == object) {
             makeGuess(currentNode);
-            currentNode = tree;//finished = true;
+            finished = true;
         }
         else {
             currentNode = askQuestion(currentNode);
         }
     }
+    //saveToFile("pangolinsTree.txt", tree);
+    return 0;
 }
