@@ -117,20 +117,22 @@ void makeGuess(Node *node) {
         printf("Yeeey I won!!\n");
     else {
         printf("What were you thinking of?\n");
-        char *userAns = getRawInput();
+        char *correctAns = getRawInput();
         printf("Can you give me a question about a %s to differentiate between"
-               " it, and a %s?\n", userAns, node->data.name);
+               " it, and a %s?\n", correctAns, node->data.name);
         char *newQuestion = getRawInput();
-        printf("What is the answer for %s?\n", userAns);
+        printf("What is the answer for %s?\n", correctAns);
         char *newAnswer = getRawInput();
 
         char *copyGuess = (char *)malloc(strlen(node->data.name)+1);
         strcpy(copyGuess, node->data.name);
 
-        Node *userObj = createBaseNode(userAns);
+        Node *userObj = createBaseNode(correctAns);
         Node *oldObj = createBaseNode(copyGuess);
 
         node->type = question;
+        free(node->data.name);
+
         node->data.question = newQuestion;
 
         if (isYes(newAnswer)) {
@@ -258,7 +260,7 @@ int main(int argc, char **argv) {
             currentNode = askQuestion(currentNode);
         }
     }
-//    saveToFile("pangolinsTree.txt", tree);
+    saveToFile("pangolinsTree.txt", tree);
     freeTree(tree);
     return 0;
 }
