@@ -112,8 +112,8 @@ char *getRawInput() {
 
 void makeGuess(Node *node) {
     printf("Is it a %s?\n>", node->data.name);
-
-    if (isYes(getRawInput()))
+    char *answer = getRawInput();
+    if (isYes(answer))
         printf("Yeeey I won!!\n");
     else {
         printf("What were you thinking of?\n");
@@ -124,7 +124,7 @@ void makeGuess(Node *node) {
         printf("What is the answer for %s?\n", userAns);
         char *newAnswer = getRawInput();
 
-        char *copyGuess = (char *)malloc(strlen(node->data.name));
+        char *copyGuess = (char *)malloc(strlen(node->data.name)+1);
         strcpy(copyGuess, node->data.name);
 
         Node *userObj = createBaseNode(userAns);
@@ -140,15 +140,19 @@ void makeGuess(Node *node) {
             node->yes = oldObj;
             node->no = userObj;
         }
+        free(newAnswer);
     }
+    free(answer);
 }
 
 Node * askQuestion(Node *node) {
     printf("%s\n>", node->data.question);
-    if (isYes(getRawInput())) {
-        printf("yes\n");
+    char *answer = getRawInput();
+    if (isYes(answer)) {
+        free(answer);
         return node->yes;
     } else {
+        free(answer);
         return node->no;
     }
 }
@@ -192,27 +196,23 @@ Node * treeReadFromFile(FILE *stream) {
     if (strcmp(subString, "question") == 0) { // Line is question
         input = malloc(buffer_size);
         sscanf(data, "%*[^:]:%[^\n]", input);
-
-            ptr->type=question;
-
+        ptr->type=question;
         ptr->data.question = input;
         ptr->yes = treeReadFromFile(stream);
         ptr->no = treeReadFromFile(stream);
+
     } else { // Line is object
         char subString[8];
         // check if line starts with 'object:'
         sscanf(data, "%[^:]", subString);
-
         if (strcmp(subString, "object") == 0) {
             input = malloc(buffer_size);
             sscanf(data, "%*[^:]:%[^\n]", input);
-            ptr->type=object;
-            ptr->data.name = input;
-            ptr->yes = NULL;
-            ptr->no = NULL;
+            free(ptr);
+            ptr = createBaseNode(input);
+
         }
     }
-
     return ptr;
 
 }
@@ -228,10 +228,25 @@ Node * loadFromFile(char *fileName) {
     return tree;
 }
 
+void freeTree(Node *root) {
+    if (root->yes == NULL) {
+        free(root->data.name);
+        free(root);
+    }
+    else {
+        freeTree(root->yes);
+        freeTree(root->no);
+
+        free(root->data.question);
+        free(root);
+    }
+
+}
+
 int main(int argc, char **argv) {
     Node *tree = loadFromFile("pangolinsTree.txt");
     //Node *tree = constructInitialTree();
-    treePrint(tree);
+
     int finished = false;
     Node *currentNode = tree;
     while(!finished) {
@@ -243,6 +258,7 @@ int main(int argc, char **argv) {
             currentNode = askQuestion(currentNode);
         }
     }
-    //saveToFile("pangolinsTree.txt", tree);
+//    saveToFile("pangolinsTree.txt", tree);
+    freeTree(tree);
     return 0;
 }
