@@ -1,0 +1,9 @@
+question:Is it real?
+question:Can I eat it?
+object:pizza
+object:pangolin
+question:Is it a creature?
+object:angel
+question:Am I one?
+object:idiot
+object:global warning

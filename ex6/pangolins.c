@@ -1,17 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/*
+#include <ctype.h>
 
-
-
-TODO Input validation shit
-
-
-
-
-
-*/
 typedef enum {
     question,
     object
@@ -33,22 +24,6 @@ struct node {
     Node *yes;
     Node *no;
 };
-
-void nodePrint(Node *node) {
-
-    printf("Object: %s \nQuestion: %s \n", node->type == object ?
-                                                             node->data.name
-                                                             : "[-]",
-                                           node->type == question ?
-                                                             node->data.question
-                                                             : "[-]");
-    if (node->yes != NULL) {
-        printf("Yes: %s\n", node->yes->type == object ? node->yes->data.name :
-                                                       "[OBJ]");
-        printf("No: %s\n", node->no->type == object ? node->no->data.name :
-                                                       "[OBJ]");
-    }
-}
 
 void treePrint(Node *root) {
     if (root == NULL)
@@ -96,8 +71,26 @@ Node * constructInitialTree() {
     return createTreeNode("Is it real?", eat, creature);
 }
 
+void toLowerCase ( char *p ) {
+    for (int i = 0; i < strlen(p); i++) {
+        p[i] = tolower(p[i]);
+    }
+}
 int isYes(char *txt) {
-    return strcmp(txt, "yes") == 0 ? true : false;
+    toLowerCase(txt);
+    if (strcmp(txt, "yes") == 0)
+        return true;
+    if (strcmp(txt, "ye") == 0)
+        return true;
+    if (strcmp(txt, "correct") == 0)
+        return true;
+    if (strcmp(txt, "yup") == 0)
+        return true;
+    if (strcmp(txt, "oui") == 0)
+        return true;
+    if (strcmp(txt, "ya") == 0)
+        return true;
+    return false;
 }
 
 #define buffer_size 100
@@ -110,17 +103,57 @@ char *getRawInput() {
     return data;
 }
 
+char * formatQuestion(char *question) {
+    question[0] = toupper(question[0]);
+
+    // Check for question mark
+    if(question[(int)strlen(question) - 1] != '?'
+        && strlen(question) < buffer_size)
+        question[(int)strlen(question)] = '?';
+    return  question;
+}
+
+char * getPreWord(char *in) {
+    switch (tolower(in[0])) {
+        case 'a':
+        case 'e':
+        case 'i':
+        case 'o':
+        case 'u':
+            return "an";
+    }
+    return "a";
+}
+
+char * formatAnswer(char *in) {
+    char *input = malloc(buffer_size);
+    if (in[0] == 'a' && in[1] == ' ') {
+        sscanf(in, "a %s", input);
+        free(in);
+        return input;
+    } else if (in[0] == 'a' && in[1] == 'n' && in[2] == ' ')
+        sscanf(in, "an %s", input);
+        free(in);
+        return input;
+    return in;
+}
+
 void makeGuess(Node *node) {
-    printf("Is it a %s?\n>", node->data.name);
+    printf("Is it %s %s?\n>", getPreWord(node->data.name), node->data.name);
     char *answer = getRawInput();
     if (isYes(answer))
         printf("Yeeey I won!!\n");
     else {
         printf("What were you thinking of?\n");
-        char *correctAns = getRawInput();
-        printf("Can you give me a question about a %s to differentiate between"
-               " it, and a %s?\n", correctAns, node->data.name);
-        char *newQuestion = getRawInput();
+        char *correctAns = formatAnswer(getRawInput());
+
+        printf("Can you give me a question about %s %s to differentiate between"
+               " it, and %s %s?\n", getPreWord(correctAns),
+                                    correctAns,
+                                    getPreWord(node->data.name),
+                                    node->data.name);
+
+        char *newQuestion = formatQuestion(getRawInput());
         printf("What is the answer for %s?\n", correctAns);
         char *newAnswer = getRawInput();
 
@@ -245,6 +278,18 @@ void freeTree(Node *root) {
 
 }
 
+// Returns true if the user wanted to end the game
+int finishGame() {
+    printf("Would you like to play again?\n>");
+    char *answer = getRawInput();
+    if (isYes(answer)) {
+        free(answer);
+        return false;
+    } else {
+        return true;
+    }
+}
+
 int main(int argc, char **argv) {
     Node *tree = loadFromFile("pangolinsTree.txt");
     //Node *tree = constructInitialTree();
@@ -254,7 +299,8 @@ int main(int argc, char **argv) {
     while(!finished) {
         if (currentNode->type == object) {
             makeGuess(currentNode);
-            finished = true;
+            currentNode = tree;
+            finished = finishGame();
         }
         else {
             currentNode = askQuestion(currentNode);
