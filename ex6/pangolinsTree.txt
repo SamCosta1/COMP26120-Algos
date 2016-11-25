@@ -1,9 +1,21 @@
 question:Is it real?
 question:Can I eat it?
+question:Is it a bird?
+question:Is it angry?
+question:Is it super fast?
+object:peragrin
+object:goose
+question:Does the queen own them all?
+object:Swan
+object:Chicken
 object:pizza
+question:Can I sit on it?
+object:chair
 object:pangolin
 question:Is it a creature?
 object:angel
 question:Am I one?
+question:Is it in debt?
+object:CS student
 object:idiot
 object:global warning

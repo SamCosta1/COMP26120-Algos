@@ -93,14 +93,17 @@ int isYes(char *txt) {
     return false;
 }
 
-#define buffer_size 100
+#define BUFFER_SIZE 100
 
-char *data;
+char *newInput;
 char *getRawInput() {
-    data = malloc(buffer_size);
-    fgets(data, buffer_size, stdin);
-    sscanf(data, "%[^\n]", data); // Extract text before newline character
-    return data;
+    char *data = malloc(BUFFER_SIZE);
+    fgets(data, BUFFER_SIZE, stdin);
+
+    newInput = malloc(strlen(data) + 1);
+    sscanf(data, "%[^\n]", newInput); // Extract text before newline character
+    free(data);
+    return newInput;
 }
 
 char * formatQuestion(char *question) {
@@ -108,7 +111,7 @@ char * formatQuestion(char *question) {
 
     // Check for question mark
     if(question[(int)strlen(question) - 1] != '?'
-        && strlen(question) < buffer_size)
+        && strlen(question) < BUFFER_SIZE)
         question[(int)strlen(question)] = '?';
     return  question;
 }
@@ -126,15 +129,20 @@ char * getPreWord(char *in) {
 }
 
 char * formatAnswer(char *in) {
-    char *input = malloc(buffer_size);
+    in[0] = tolower(in[0]);
     if (in[0] == 'a' && in[1] == ' ') {
+        char *input = malloc(strlen(in) - 1);
         sscanf(in, "a %s", input);
+        input[0] = tolower(input[0]);
         free(in);
         return input;
-    } else if (in[0] == 'a' && in[1] == 'n' && in[2] == ' ')
+    } else if (in[0] == 'a' && in[1] == 'n' && in[2] == ' ') {
+        char *input = malloc(strlen(in) - 1);
         sscanf(in, "an %s", input);
         free(in);
+        input[0] = tolower(input[0]);
         return input;
+    }
     return in;
 }
 
@@ -216,8 +224,8 @@ void saveToFile(char *fileName, Node *root) {
 
 char *input;
 Node * treeReadFromFile(FILE *stream) {
-    char data[buffer_size];
-    fgets(data, buffer_size, stream);
+    char data[BUFFER_SIZE];
+    fgets(data, BUFFER_SIZE, stream);
 
     if (strcmp(data,"") == 0) {
         return NULL;
@@ -229,7 +237,7 @@ Node * treeReadFromFile(FILE *stream) {
     // check if line starts with 'question:'
     sscanf(data, "%[^:]", subString);
     if (strcmp(subString, "question") == 0) { // Line is question
-        input = malloc(buffer_size);
+        input = malloc(strlen(data) - 6);
         sscanf(data, "%*[^:]:%[^\n]", input);
         ptr->type=question;
         ptr->data.question = input;
@@ -241,7 +249,7 @@ Node * treeReadFromFile(FILE *stream) {
         // check if line starts with 'object:'
         sscanf(data, "%[^:]", subString);
         if (strcmp(subString, "object") == 0) {
-            input = malloc(buffer_size);
+            input = malloc(strlen(data) - 6);
             sscanf(data, "%*[^:]:%[^\n]", input);
             free(ptr);
             ptr = createBaseNode(input);
@@ -286,6 +294,7 @@ int finishGame() {
         free(answer);
         return false;
     } else {
+        free(answer);
         return true;
     }
 }
