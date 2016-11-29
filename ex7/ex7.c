@@ -1,6 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
+
+#define BUFFER_SIZE 100
+
+const unsigned long PRIMITIVE_ROOT = 3;
+const unsigned long PRIME = 65537;
+unsigned long publicKey = -1;
+
+void memoryCheck(void *ptr) {
+    if (ptr == NULL) {
+        printf("Memeory issue");
+        exit(0);
+    }
+}
 
 unsigned long hcf(unsigned long a, unsigned long b) {
     if (b == 0)
@@ -33,8 +47,11 @@ unsigned long dl(unsigned long y,unsigned long pRoot,unsigned long prime) {
     return x;
 }
 
-unsigned long imp(unsigned long y, unsigned long p) {
-
+unsigned long imp(unsigned long y, unsigned long prime) {
+    if (y >= 1 && y < prime)
+        return fme(y, prime - 2, prime);
+    else
+        return -1;
 }
 void testfme() {
     printf("%d^%d mod %d = %lu\n", 5, 15, 7, fme(5,15,7));
@@ -50,8 +67,118 @@ void testdl() {
     printf("%d^%lu mod %d = %d\n", 3, dl(222, 3, 257), 257, 222);
     printf("%d^%lu mod %lu = %lu\n", 2, dl(2952904674, 2, 4093082899), 4093082899,  2952904674);
 }
+
+void testSingleimp(int a, int p) {
+    unsigned long ans = imp(a,p);
+    printf("%s\n", (ans * a) % p == 1 ? "yey" : "no");
+}
+
+char *newInput;
+char *getRawInput() {
+    char *data = malloc(BUFFER_SIZE);
+    memoryCheck(data);
+    fgets(data, BUFFER_SIZE, stdin);
+
+    newInput = malloc(strlen(data) + 1);
+    memoryCheck(newInput);
+    sscanf(data, "%[^\n]", newInput); // Extract text before newline character
+    free(data);
+    return newInput;
+}
+
+void testimp() {
+    testSingleimp(2,3);
+    testSingleimp(52,127);
+    testSingleimp(34,37);
+    testSingleimp(26,31);
+}
+
+unsigned long getULInput() {
+    char *str = getRawInput();
+    char *ptr;
+    return strtoul(str, &ptr, 10);
+}
+void printPrompt() {
+    printf("Prime modulus is %lu\n"
+           "Primitive root wrt %lu is %lu\n"
+           "Choose: e (encrypt) | d (decrypt) |k (get public key) | x (exit)?)\n",
+            PRIME, PRIMITIVE_ROOT, PRIME);
+}
+
+void getPublicKey() {
+    printf("Type private key (between 1 and %lu): ", PRIME);
+    unsigned long privateKey = getULInput();
+
+    if (privateKey < 1 || privateKey >= PRIME) {
+        printf("Invalid Input\n\n");
+        getPublicKey();
+    }
+
+    publicKey = fme(PRIMITIVE_ROOT, privateKey, PRIME);
+    printf("Public key is %lu\n\n", publicKey);
+}
+
+void decrypt() {
+    printf("Type recieved message in form (a,b): ");
+    unsigned long a;
+    unsigned long b;
+    unsigned long privateKey;
+
+    char *input = getRawInput();
+    sscanf(input, "(%lu,%lu)", &a, &b);
+
+    printf("Type in private key: ");
+    privateKey = getULInput();
+
+    unsigned long message = b / fme(a, privateKey, PRIME);
+    printf("The decrypted secret is: %lu\n\n", message);
+}
+void encrypt() {
+    printf("Input a message (between 1 and %lu): ", PRIME);
+    unsigned long message = getULInput();
+    if (message < 1 || message >= PRIME) {
+        printf("Invalid Input\n\n");
+        encrypt();
+    }
+
+    // Note: this is not considered cryptographically secure but should suffice
+    // for a lab exercise
+    int random = rand() % PRIME;
+
+    if (publicKey == -1)
+        getPublicKey();
+
+    // a & b make up the integer secret pair (a, b) to return to user
+    unsigned long a = fme(PRIMITIVE_ROOT, random, PRIME);
+    unsigned long b = message * fme(publicKey, random, PRIME);
+
+
+    printf("The secret number to send: %lu\n", message);
+    printf("The recipiant's public key: %lu\n\n", publicKey);
+    printf("Encrypted secret is: (%lu, %lu)\n\n\n", a, b);
+}
+void cryptoInterface() {
+    int finished = 0;
+    while(!finished) {
+        printPrompt();
+        printf("Enter an option (e | d | k | x)\n");
+        char *choice = getRawInput();
+
+        if (strcmp(choice, "x") == 0)
+            finished = 1;
+        else if (strcmp(choice, "e") == 0)
+            encrypt();
+        else if (strcmp(choice, "d") == 0)
+            decrypt();
+        else if (strcmp(choice, "k") == 0)
+            getPublicKey();
+    }
+}
+
 int main(int argc, char **argv) {
-    testfme();
-    printf("\n");
-    testdl();
+    //testfme();
+    //printf("\n");
+    //testdl();
+    testimp();
+    cryptoInterface();
 }
