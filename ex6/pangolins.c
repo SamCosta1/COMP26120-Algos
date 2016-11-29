@@ -25,6 +25,8 @@ struct node {
     Node *no;
 };
 
+
+
 void treePrint(Node *root) {
     if (root == NULL)
         return;
@@ -40,6 +42,7 @@ void treePrint(Node *root) {
 
 Node * createBaseNode(char *name) {
     Node *new = (Node *)malloc(sizeof(Node));
+    memoryCheck(new);
     new->type = object;
     new->yes = NULL;
     new->no = NULL;
@@ -49,7 +52,8 @@ Node * createBaseNode(char *name) {
 }
 
 Node * createTreeNode(char *query, Node *yes, Node*no) {
-    Node *new = (Node *)malloc(sizeof(Node));
+    Node * new = (Node *)malloc(sizeof(Node));
+    memoryCheck(new);
     new->type = question;
     new->yes = yes;
     new->no = no;
@@ -98,9 +102,11 @@ int isYes(char *txt) {
 char *newInput;
 char *getRawInput() {
     char *data = malloc(BUFFER_SIZE);
+    memoryCheck(data);
     fgets(data, BUFFER_SIZE, stdin);
 
     newInput = malloc(strlen(data) + 1);
+    memoryCheck(newInput);
     sscanf(data, "%[^\n]", newInput); // Extract text before newline character
     free(data);
     return newInput;
@@ -132,12 +138,14 @@ char * formatAnswer(char *in) {
     in[0] = tolower(in[0]);
     if (in[0] == 'a' && in[1] == ' ') {
         char *input = malloc(strlen(in) - 1);
+        memoryCheck(input);
         sscanf(in, "a %s", input);
         input[0] = tolower(input[0]);
         free(in);
         return input;
     } else if (in[0] == 'a' && in[1] == 'n' && in[2] == ' ') {
         char *input = malloc(strlen(in) - 1);
+        memoryCheck(input);
         sscanf(in, "an %s", input);
         free(in);
         input[0] = tolower(input[0]);
@@ -166,6 +174,7 @@ void makeGuess(Node *node) {
         char *newAnswer = getRawInput();
 
         char *copyGuess = (char *)malloc(strlen(node->data.name)+1);
+        memoryCheck(copyGuess);
         strcpy(copyGuess, node->data.name);
 
         Node *userObj = createBaseNode(correctAns);
@@ -232,12 +241,14 @@ Node * treeReadFromFile(FILE *stream) {
     }
 
     Node *ptr = malloc(sizeof(Node));
+    memoryCheck(ptr);
 
     char subString[8];
     // check if line starts with 'question:'
     sscanf(data, "%[^:]", subString);
     if (strcmp(subString, "question") == 0) { // Line is question
         input = malloc(strlen(data) - 6);
+        memoryCheck(input);
         sscanf(data, "%*[^:]:%[^\n]", input);
         ptr->type=question;
         ptr->data.question = input;
@@ -250,6 +261,7 @@ Node * treeReadFromFile(FILE *stream) {
         sscanf(data, "%[^:]", subString);
         if (strcmp(subString, "object") == 0) {
             input = malloc(strlen(data) - 6);
+            memoryCheck(input);
             sscanf(data, "%*[^:]:%[^\n]", input);
             free(ptr);
             ptr = createBaseNode(input);
