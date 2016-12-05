@@ -11,6 +11,10 @@ object:Chicken
 object:pizza
 question:Can I sit on it?
 object:chair
+question:Does it radiate heat?
+object:radiator
+question:Can I write with it?
+object:pen
 object:pangolin
 question:Is it a creature?
 object:angel

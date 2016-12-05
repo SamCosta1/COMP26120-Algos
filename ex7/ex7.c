@@ -59,6 +59,7 @@ void testfme() {
     printf("%d^%d mod %d = %lu\n", 3, 12, 257, fme(3, 12, 257));
     printf("%d^%d mod %d = %lu\n", 2, 62, 443, fme(2, 62, 443));
     printf("%d^%d mod %lu = %lu\n", 2, 16000000, 4093082899, fme(2, 16000000, 4093082899));
+    printf("\n");
 }
 
 void testdl() {
@@ -66,11 +67,12 @@ void testdl() {
     printf("%d^%lu mod %d = %d\n", 3, dl(8, 3, 17), 17, 8);
     printf("%d^%lu mod %d = %d\n", 3, dl(222, 3, 257), 257, 222);
     printf("%d^%lu mod %lu = %lu\n", 2, dl(2952904674, 2, 4093082899), 4093082899,  2952904674);
+    printf("\n");
 }
 
 void testSingleimp(int a, int p) {
     unsigned long ans = imp(a,p);
-    printf("%s\n", (ans * a) % p == 1 ? "yey" : "no");
+    printf("%s\n", (ans * a) % p == 1 ? "Test Succeeded" : "Test Failed");
 }
 
 char *newInput;
@@ -91,6 +93,7 @@ void testimp() {
     testSingleimp(52,127);
     testSingleimp(34,37);
     testSingleimp(26,31);
+    printf("\n");
 }
 
 unsigned long getULInput() {
@@ -176,9 +179,8 @@ void cryptoInterface() {
 }
 
 int main(int argc, char **argv) {
-    //testfme();
-    //printf("\n");
-    //testdl();
+    testfme();
+    testdl();
     testimp();
     cryptoInterface();
 }
