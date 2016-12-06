@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <time.h>
 
 #define BUFFER_SIZE 100
 
@@ -40,16 +41,23 @@ unsigned long fme(unsigned long primitiveRoot, unsigned long exponent,
 }
 
 unsigned long dl(unsigned long y,unsigned long pRoot,unsigned long prime) {
+    if (y < 1 || y >= prime)
+        return -1;
+
     unsigned long x = 1;
-    while (fme(pRoot, x, prime) != y) {
+    while (fme(pRoot, x, prime) != y && x < prime) {
         x++;
     }
+
+    if (x >= prime)
+        return -1;
+
     return x;
 }
 
 unsigned long imp(unsigned long y, unsigned long prime) {
     if (y >= 1 && y < prime)
-        return fme(y, prime - 2, prime);
+        return fme(y, 20, prime);
     else
         return -1;
 }
@@ -126,15 +134,22 @@ void decrypt() {
     unsigned long a;
     unsigned long b;
     unsigned long privateKey;
+    unsigned long aToPowerKey;
 
     char *input = getRawInput();
     sscanf(input, "(%lu,%lu)", &a, &b);
-
     printf("Type in private key: ");
-    privateKey = getULInput();
 
-    unsigned long message = b / fme(a, privateKey, PRIME);
-    printf("The decrypted secret is: %lu\n\n", message);
+    privateKey = getULInput();
+    aToPowerKey = fme(a, privateKey, PRIME);
+
+    if (aToPowerKey <= 0) {
+        // Should never happen
+        printf("Error - Please try again\n");
+    } else {
+        unsigned long message = b / aToPowerKey;
+        printf("The decrypted secret is: %lu\n\n", message);
+    }
 }
 void encrypt() {
     printf("Input a message (between 1 and %lu): ", PRIME);
@@ -161,6 +176,10 @@ void encrypt() {
     printf("Encrypted secret is: (%lu, %lu)\n\n\n", a, b);
 }
 void cryptoInterface() {
+    // Seed the random number genererator
+    time_t t;
+    srand((unsigned) time(&t));
+
     int finished = 0;
     while(!finished) {
         printPrompt();
