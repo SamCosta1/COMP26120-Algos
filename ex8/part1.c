@@ -30,22 +30,31 @@ Book * mergeSort(Book * L, int start, int end,
 }
 
 Book *newArray;
-Book * merge(Book *L, int low, int mid, int high, int(*compar)(const void *, const void *)) {
-   int l1, l2, i;
+/*
+   Adapted from code seen on tutorial point
+   https://www.tutorialspoint.com/data_structures_algorithms/merge_sort_program_in_c.htm
+*/
+Book * merge(Book *L, int start1, int start2, int end2, int(*compar)(const void *, const void *)) {
+   int startIndex = start1;
+   int middleIndex = start2 + 1;
+   int newArrayIndex = start1;
 
-   for(l1 = low, l2 = mid + 1, i = low; l1 <= mid && l2 <= high; i++) {
-      if (compar(&L[l1],&L[l2]) <= 0)
-         newArray[i] = L[l1++];
+   while (startIndex <= start2 &&
+          middleIndex <= end2) {
+      if (compar(&L[startIndex], &L[middleIndex]) <= 0)
+         newArray[newArrayIndex++] = L[startIndex++];
       else
-         newArray[i] = L[l2++];
+         newArray[newArrayIndex++] = L[middleIndex++];
    }
-   while(l1 <= mid)
-      newArray[i++] = L[l1++];
 
-   while(l2 <= high)
-      newArray[i++] = L[l2++];
+   while (startIndex <= start2)
+      newArray[newArrayIndex++] = L[startIndex++];
 
-   for(i = low; i <= high; i++)
+   while (middleIndex <= end2)
+      newArray[newArrayIndex++] = L[middleIndex++];
+
+   // Update the original array to use sorted values
+   for (int i = start1; i <= end2; i++)
       L[i] = newArray[i];
 
    return newArray;
@@ -152,7 +161,7 @@ void print_results(Book*L, int N)
     int i;
     if((fp=fopen("top20.txt","w")))
     {
-      for(i=N-1;i>=N-20;i--)
+      for(i=0;i<20;i++)
       {
 	  printf("%-3g %g %g %d\n", L[i].rating, L[i].price, L[i].relevance, L[i].ID);
 	  fprintf(fp, "%-3g %g %g %d\n", L[i].rating, L[i].price, L[i].relevance, L[i].ID);
