@@ -13,36 +13,45 @@ typedef struct book
   int ID;
 } Book;
 
-void merge(Book *list1, Book *list2, int(*compar)(const void *, const void *));
+Book * merge(Book *list, int start, int length1, int length2, int(*compar)(const void *, const void *));
 void print_results(Book*L, int N);
 
-void mergeSort(Book * L, int listLength,
-                         int(*compar)(const void *, const void *)) {
-    if (listLength < 1)
 
-    print_results(L, listLength);
-    printf("------\n");
-    int halfFloored = listLength / 2;
-    merge(mergeSort(L, halfFloored, compar),
-                 mergeSort(L+halfFloored, listLength - halfFloored, compar), compar);
+
+Book * mergeSort(Book * L, int start, int end,
+                         int(*compar)(const void *, const void *)) {
+   if (start >= end)
+      return NULL;
+
+   int middle = (start + end) / 2;
+   mergeSort(L, start, middle, compar);
+   mergeSort(L, middle+1, end, compar);
+   return merge(L, start, middle, end, compar);
 }
 
+Book *newArray;
+Book * merge(Book *L, int low, int mid, int high, int(*compar)(const void *, const void *)) {
+   int l1, l2, i;
 
-void merge(Book *list1, Book *list2, int(*compar)(const void *, const void *)) {
-   if (list1 == NULL || list2 == NULL)
-      return;
-
-   if (compar(&(list1[0]), &(list2[0])) <= 0) {
-      merge(++list1, list2, compar);
-
-   } else {
-      merge(++list1, list2+1, compar);
-
+   for(l1 = low, l2 = mid + 1, i = low; l1 <= mid && l2 <= high; i++) {
+      if (compar(&L[l1],&L[l2]) <= 0)
+         newArray[i] = L[l1++];
+      else
+         newArray[i] = L[l2++];
    }
+   while(l1 <= mid)
+      newArray[i++] = L[l1++];
+
+   while(l2 <= high)
+      newArray[i++] = L[l2++];
+
+   for(i = low; i <= high; i++)
+      L[i] = newArray[i];
+
+   return newArray;
 }
 
 Book *list;
-
 int read_file(char *infile, int N)
 {
   int c;
@@ -64,15 +73,15 @@ int read_file(char *infile, int N)
     }
   return(c);
 }
-int comp_on_rating(const void *a, const void *b)
+int comp_on_rating(const void *list, const void *newArray)
 {
-  if ((*(Book *)a).rating < (*(Book *)b).rating)
+  if ((*(Book *)list).rating < (*(Book *)newArray).rating)
   {
      return -1;
   }
     else
   {
-    if ((*(Book *)a).rating > (*(Book *)b).rating)
+    if ((*(Book *)list).rating > (*(Book *)newArray).rating)
     {
       return 1;
     }
@@ -82,16 +91,16 @@ int comp_on_rating(const void *a, const void *b)
     }
   }
 }
-int comp_on_relev(const void *a, const void *b)
+int comp_on_relev(const void *list, const void *newArray)
 {
 
-  if ((*(Book *)a).relevance < (*(Book *)b).relevance)
+  if ((*(Book *)list).relevance < (*(Book *)newArray).relevance)
   {
      return -1;
   }
      else
   {
-     if ((*(Book *)a).relevance > (*(Book *)b).relevance)
+     if ((*(Book *)list).relevance > (*(Book *)newArray).relevance)
      {
        return 1;
      }
@@ -101,16 +110,16 @@ int comp_on_relev(const void *a, const void *b)
      }
   }
 }
-int comp_on_price(const void *a, const void *b)
+int comp_on_price(const void *list, const void *newArray)
 {
 
-  if ((*(Book *)a).price < (*(Book *)b).price)
+  if ((*(Book *)list).price < (*(Book *)newArray).price)
   {
      return 1;
   }
      else
   {
-     if ((*(Book *)a).price > (*(Book *)b).price)
+     if ((*(Book *)list).price > (*(Book *)newArray).price)
      {
        return -1;
      }
@@ -125,8 +134,9 @@ void user_interface(int N)
 {
 
   // For Part 1 this function calls the sort function to sort on Price only
-  mergeSort(list, N, comp_on_price);
-
+  newArray = malloc(N *sizeof(Book));
+  newArray = mergeSort(list, 0, N, comp_on_price);
+  print_results(newArray, N);
 
   // For Part 2 this function
   // (1) asks the user if they would like to sort their search results
@@ -144,8 +154,8 @@ void print_results(Book*L, int N)
     {
       for(i=N-1;i>=N-20;i--)
       {
-	  printf("%g %g %g %d\n", L[i].rating, L[i].price, L[i].relevance, L[i].ID);
-	  fprintf(fp, "%g %g %g %d\n", L[i].rating, L[i].price, L[i].relevance, L[i].ID);
+	  printf("%-3g %g %g %d\n", L[i].rating, L[i].price, L[i].relevance, L[i].ID);
+	  fprintf(fp, "%-3g %g %g %d\n", L[i].rating, L[i].price, L[i].relevance, L[i].ID);
 
       }
       fclose(fp);
@@ -157,6 +167,7 @@ void print_results(Book*L, int N)
     }
 
 }
+
 int main(int argc, char *argv[])
 {
   int N;
@@ -175,7 +186,6 @@ int main(int argc, char *argv[])
 
   user_interface(N);
 
-  print_results(list, N);
 
   return(0);
 }
