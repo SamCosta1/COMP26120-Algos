@@ -141,6 +141,7 @@ void decrypt() {
     printf("Type in private key: ");
 
     privateKey = getULInput();
+    
     aToPowerKey = fme(a, privateKey, PRIME);
 
     if (aToPowerKey <= 0) {
@@ -198,8 +199,10 @@ void cryptoInterface() {
 }
 
 int main(int argc, char **argv) {
-    testfme();
+ /*   testfme();
     testdl();
-    testimp();
+    testimp();*/
+    
+     printf("%d^%d mod %d = %lu\n", 5, 15, 7, fme(40781,40000,65537));
     cryptoInterface();
 }
