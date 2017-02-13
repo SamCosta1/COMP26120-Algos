@@ -17,9 +17,9 @@
 /* some useful code ***********************************************************/
 
 char *prog_name;
-void check (void *memory) 
+void check (void *memory)
 { // check result from strdup, malloc etc.
-  if (memory == NULL) 
+  if (memory == NULL)
   {
     fprintf (stderr, "%s: out of memory\n", prog_name);
     exit (3);
@@ -30,12 +30,12 @@ void check (void *memory)
 
 #define WORD_SIZE (50)
 static int line_count= 0, first_word_on_line= TRUE;
-static void init_get_next_lower_word (void) 
+static void init_get_next_lower_word (void)
 {
   line_count= 0;
   first_word_on_line= TRUE;
 }
-static char *get_next_lower_word(FILE *source) 
+static char *get_next_lower_word(FILE *source)
 {
   /* reads next word from source.
    * A word consists of a sequence of alphabetic characters.
@@ -48,28 +48,28 @@ static char *get_next_lower_word(FILE *source)
   // on seeing a '\n', need to increment line_count at the *next* word,
   // even if the '\n' terminated *this* word,
   // so that line-numbers are reported correctly
-  while (!done && fscanf (source, "%c", &ch)==1) 
+  while (!done && fscanf (source, "%c", &ch)==1)
   {
-    if (isalpha (ch)) 
-    {   // || ch=='-') ?  
-        if (first_word_on_line) 
+    if (isalpha (ch))
+    {   // || ch=='-') ?
+        if (first_word_on_line)
         {
 	  line_count++; first_word_on_line= FALSE;
         }
         word[word_len++]= tolower(ch);
     }
-      else 
+      else
     { // non-alphabetic
-      if (word_len > 0) 
+      if (word_len > 0)
       { // non-alphabetic terminates the word
 	word[word_len]= 0;
 	done= TRUE ;
       }
-      if (ch == '\n') 
+      if (ch == '\n')
       { // Can't just add one to line count,
 	                // since last word on line might be reported
-	if (first_word_on_line) // already seen one '\n'	 
-        {  
+	if (first_word_on_line) // already seen one '\n'
+        {
           line_count++;
         }
 	first_word_on_line= TRUE;
@@ -94,7 +94,7 @@ static char *dict_file_name;
 static char *file_name;
 static int table_size= DEFAULT_TABLE_SIZE;
 
-static void usage() 
+static void usage()
 { // reports the usage of the program
   fprintf(stderr,
           "Usage: %s [-d dictionary] [-s table_size] [-m mode] [-v] [-h] text_file\n",
@@ -107,20 +107,20 @@ static void usage()
   exit(1);
 }
 
-static int process_args (int argc, char *argv[]) 
+static int process_args (int argc, char *argv[])
 { /* Processes all command line arguments using getopt.
    * (modified version of the code given in the man page)
    */
   if (argc < 2)
     usage ();
-  while (1) 
+  while (1)
   {
     int c= getopt (argc, argv, "s:d:m:vh");
     if (c == -1)
-    {  
+    {
       break;
     }
-    switch (c) 
+    switch (c)
     {
     case 's': // set table size to arg
       table_size= atoi (optarg);
@@ -145,11 +145,11 @@ static int process_args (int argc, char *argv[])
   /* All being well we've only the file name left.
      We'll ignore any other args
    */
-  if (optind < argc) 
+  if (optind < argc)
   {
     file_name= argv[optind];
   }
-  else 
+  else
   { // no file name given
     usage();
   }
@@ -158,10 +158,10 @@ static int process_args (int argc, char *argv[])
 
 /******************************************************************************/
 
-static FILE *open_file (char *file_name) 
+static FILE *open_file (char *file_name)
 {
   FILE *text_file= fopen (file_name, "r");
-  if (text_file == NULL) 
+  if (text_file == NULL)
   {
     fprintf(stderr, "%s: Can't open %s\n", prog_name, file_name);
     exit(3);
@@ -169,7 +169,7 @@ static FILE *open_file (char *file_name)
   return text_file;
 }
 
-int main (int argc, char *argv[]) 
+int main (int argc, char *argv[])
 {
   Table table;
   FILE *dict_file, *text_file;
@@ -180,7 +180,7 @@ int main (int argc, char *argv[])
   dict_file_name= DEFAULT_DICT_FILE;
   process_args (argc, argv);
 
-  if (verbose > 0) 
+  if (verbose > 0)
   {
     fprintf (stderr,"Using table size %d\n", table_size);
     fprintf (stderr,"Using dictionary `%s'\n", dict_file_name);
@@ -191,7 +191,8 @@ int main (int argc, char *argv[])
   dict_file= open_file (dict_file_name);
   text_file= open_file (file_name);
 
-  table= initialize_table (table_size);
+
+  table = initialize_table (table_size);
 
   if (verbose > 0)
   {
@@ -199,11 +200,11 @@ int main (int argc, char *argv[])
   }
 
   init_get_next_lower_word ();
-  while ((word= get_next_lower_word (dict_file))) 
+  while ((word= get_next_lower_word (dict_file)))
   {
     table= insert (word, table);
     word_count++;
-    if ((verbose > 0) && (word_count % 100 == 0)) 
+    if ((verbose > 0) && (word_count % 100 == 0))
     {
       fprintf (stderr,".");
       fflush (stderr);
@@ -214,14 +215,14 @@ int main (int argc, char *argv[])
   {
      fprintf (stderr,"\nDictionary read\n");
   }
-  if (verbose > 1) 
+  if (verbose > 1)
   { // call with option -vv to get this
     print_table (table);
     printf("Spellchecking:\n");
   }
 
   init_get_next_lower_word ();
-  while ((word= get_next_lower_word (text_file))) 
+  while ((word= get_next_lower_word (text_file)))
   {
     if (!find (word, table))
       printf ("%d: %s\n", line_count, word);

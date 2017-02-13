@@ -34,11 +34,11 @@ Table initialize_table(/*ignore parameter*/) {
 tree_ptr newNode(Key_Type element, tree_ptr parent, tree_ptr left, tree_ptr right) {
     tree_ptr new = malloc(sizeof(struct node));
     check(new);
-    new -> element = strdup(element);
     new -> parent = parent;
     new -> left = left;
     new -> right = right;
     new -> height = 1;
+    new -> element = strdup(element);
     return new;
 }
 
@@ -90,30 +90,38 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
     if (z->right == y) {
         a = z;
 
-        if (y->right == x) {
+        if (y->right == x) { // (a)
             b = y;
             c = x;
 
             T1 = b->left;
-        } else {
+            T2 = c->left;
+        } else { // (c)
             b = x;
             c = y;
+
+            T1 = b -> left;
+            T2 = b -> right;
         }
     } else {
         c = z;
 
-        if (y -> right == x) {
+        if (y -> right == x) { // (d)
             a = y;
             b = x;
-        } else {
+
+            T1 = b -> left;
+            T2 = b -> right;
+        } else { // (b)
             b = y;
             a = x;
+
+            T1 = a -> right;
+            T2 = b -> right;
         }
     }
 
     T0 = a -> left;
-    T1 = a == x ? a->right : b->left;
-    T2 = c == x ? c->left : b->right;
     T3 = c -> right;
 
     if (z->parent != NULL) {
@@ -140,13 +148,11 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
     setParent(T2,c);
     setParent(T3,c);
 
-
-
     a->height = 1 + max(getHeight(T0), getHeight(T1));
     c->height = 1 + max(getHeight(T2), getHeight(T3));
     b->height =  1 + max(getHeight(a), getHeight(c));
 
-    fflush(stdout);
+
     return b;
 }
 
