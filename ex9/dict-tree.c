@@ -116,16 +116,6 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
     T2 = c == x ? c->left : b->right;
     T3 = c -> right;
 
-    printf("\nTree T0 ");
-    print_tree_in_order(T0);
-    printf("\nTree T1 ");
-    print_tree_in_order(T1);
-    printf("\nTree T2 ");
-    print_tree_in_order(T2);
-    printf("\nTree T3 ");
-    print_tree_in_order(T3);
-    fflush(stdout);
-
     if (z->parent != NULL) {
         if (z->parent->left == z)
             z->parent->left = b;
@@ -156,8 +146,6 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
     c->height = 1 + max(getHeight(T2), getHeight(T3));
     b->height =  1 + max(getHeight(a), getHeight(c));
 
-    printf("\nTree b ");
-    print_tree_in_order(b);
     fflush(stdout);
     return b;
 }
@@ -197,7 +185,9 @@ void insertToTree(Key_Type word, tree_ptr tree) {
         else {
             tree -> left = newNode(word, tree, NULL, NULL);
             calculateHeight(tree->left);
-            rebalance(tree, tree);
+
+            if (mode == 1)
+                rebalance(tree, tree);
         }
     }
 
@@ -207,7 +197,9 @@ void insertToTree(Key_Type word, tree_ptr tree) {
         else {
             tree -> right = newNode(word, tree, NULL, NULL);
             calculateHeight(tree->right);
-            rebalance(tree->right, tree);
+
+            if (mode == 1)
+                rebalance(tree->right, tree);
         }
     }
 }
@@ -225,16 +217,17 @@ Table insert(Key_Type word, Table table) {
 
 Boolean findInTree(Key_Type word, tree_ptr tree) {
     int compareVal = strcmp(tree->element, word);
+    //printf("word: |%s|, element: |%s|\n, compvak: %d", word, tree->element);
     numStringComps++;
 
-    if (compareVal < 0) {
+    if (compareVal > 0) {
         if (tree->left != NULL)
             return findInTree(word, tree->left);
         else
             return FALSE;
     }
 
-    if (compareVal > 0) {
+    if (compareVal < 0) {
         if (tree->right != NULL)
             return findInTree(word, tree->right);
         else
@@ -264,6 +257,7 @@ void print_tree_in_order(tree_ptr tree) {
 
     print_tree_in_order(tree->left);
     printf("%s \n", tree->element);
+    fflush(stdout);
     print_tree_in_order(tree->right);
 }
 
@@ -273,7 +267,6 @@ void print_table(Table table) {
 
 void print_stats (Table table) {
     printf("Avarage #String compares in find: %d\n", averageStringComps);
-    printf("Height: %d", table->head->height);
+    printf("Height: %d\n", table->head->height);
 
-    printf("left: %s", print_tree_in_order(table->head->left));
 }
