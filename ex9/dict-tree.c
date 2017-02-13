@@ -74,44 +74,92 @@ void setParent(tree_ptr node, tree_ptr parent) {
         node -> parent = parent;
 }
 
-tree_ptr restructure(tree_ptr node, tree_ptr parent, tree_ptr grandParent) {
+int getHeight(tree_ptr node) {
+    return node == NULL ? 0 : node -> height;
+}
+
+tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
     tree_ptr T0;
     tree_ptr T1;
     tree_ptr T2;
     tree_ptr T3;
+    tree_ptr a;
+    tree_ptr b;
+    tree_ptr c;
 
-    T0 = grandParent->left;
-    T1 = parent->left;
+    if (z->right == y) {
+        a = z;
 
-    T2 = node->left;
-    T3 = node->right;
+        if (y->right == x) {
+            b = y;
+            c = x;
 
-    node->left = T0;
-    node->right = T1;
-    setParent(T0, node);
-    setParent(T1, node);
-
-    if (grandParent->parent != NULL) {
-        if ((grandParent->parent)->left == grandParent) {
-            (grandParent->parent)->left = parent;
+            T1 = b->left;
         } else {
-            (grandParent->parent)->right = parent;
+            b = x;
+            c = y;
+        }
+    } else {
+        c = z;
+
+        if (y -> right == x) {
+            a = y;
+            b = x;
+        } else {
+            b = y;
+            a = x;
         }
     }
 
-    parent->right = grandParent;
-    setParent(grandParent, parent);
+    T0 = a -> left;
+    T1 = a == x ? a->right : b->left;
+    T2 = c == x ? c->left : b->right;
+    T3 = c -> right;
 
-    grandParent->left = T2;
-    grandParent->right = T3;
-    setParent(T2, grandParent);
-    setParent(T3, grandParent);
+    printf("\nTree T0 ");
+    print_tree_in_order(T0);
+    printf("\nTree T1 ");
+    print_tree_in_order(T1);
+    printf("\nTree T2 ");
+    print_tree_in_order(T2);
+    printf("\nTree T3 ");
+    print_tree_in_order(T3);
+    fflush(stdout);
 
-    node->height = 1 + maxNodes(T0, T1);
-    grandParent->height = 1 + maxNodes(T2, T3);
-    parent->height = 1 + maxNodes(node, grandParent);
+    if (z->parent != NULL) {
+        if (z->parent->left == z)
+            z->parent->left = b;
+        else
+            z->parent->right = b;
+    }
 
-    return parent;
+    b->parent = z->parent;
+
+    b->left = a;
+    a->left = T0;
+    a->right = T1;
+
+    b->right = c;
+    c->left = T2;
+    c->right = T3;
+
+    setParent(a,b);
+    setParent(T0,a);
+    setParent(T1,a);
+    setParent(c,b);
+    setParent(T2,c);
+    setParent(T3,c);
+
+
+
+    a->height = 1 + max(getHeight(T0), getHeight(T1));
+    c->height = 1 + max(getHeight(T2), getHeight(T3));
+    b->height =  1 + max(getHeight(a), getHeight(c));
+
+    printf("\nTree b ");
+    print_tree_in_order(b);
+    fflush(stdout);
+    return b;
 }
 
 int nodeHeight(tree_ptr n) {
@@ -133,26 +181,32 @@ void rebalance(tree_ptr node, tree_ptr tree) {
     }
 }
 
+void calculateHeight(tree_ptr node) {
+    node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+
+    if (node->parent != NULL)
+        calculateHeight(node->parent);
+}
+
 void insertToTree(Key_Type word, tree_ptr tree) {
     int compareVal = strcmp(tree->element, word);
 
-    if (compareVal < 0) {
+    if (compareVal > 0) {
         if (tree -> left != NULL)
             insertToTree(word, tree->left);
         else {
             tree -> left = newNode(word, tree, NULL, NULL);
-
-
+            calculateHeight(tree->left);
             rebalance(tree, tree);
         }
     }
 
-    if (compareVal > 0) {
+    if (compareVal < 0) {
         if (tree -> right != NULL)
             insertToTree(word, tree->right);
         else {
             tree -> right = newNode(word, tree, NULL, NULL);
-
+            calculateHeight(tree->right);
             rebalance(tree->right, tree);
         }
     }
@@ -219,4 +273,7 @@ void print_table(Table table) {
 
 void print_stats (Table table) {
     printf("Avarage #String compares in find: %d\n", averageStringComps);
+    printf("Height: %d", table->head->height);
+
+    printf("left: %s", print_tree_in_order(table->head->left));
 }
