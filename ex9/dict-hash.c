@@ -7,7 +7,6 @@
 #include "speller.h"
 #include "dict.h"
 
-typedef struct cell* Cell;
 typedef struct
 { // hash-table entry
   Key_Type element; // only data is the key itself
@@ -71,7 +70,6 @@ Table insert (Key_Type key, Table t) {
     cell *cells = t->cells;
     cell *hashCell = &cells[hashVal];
 
-
     if (hashCell->state == empty) {
         hashCell->state = in_use;
         hashCell->element = strdup(key);
@@ -97,7 +95,6 @@ void print_table (Table t)
 
         printf("%2d  %s\n", i, c->element == NULL? "" : c->element);
     }
-
 }
 
 void print_stats (Table t)

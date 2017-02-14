@@ -87,10 +87,10 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
     tree_ptr b;
     tree_ptr c;
 
-    if (z->right == y) {
+    if (strcmp(z->right->element, y->element) == 0) {
         a = z;
 
-        if (y->right == x) { // (a)
+        if (strcmp(y->right->element, x->element) == 0) { // (a)
             b = y;
             c = x;
 
@@ -106,7 +106,7 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
     } else {
         c = z;
 
-        if (y -> right == x) { // (d)
+        if (strcmp(y->right->element, x->element) == 0) { // (d)
             a = y;
             b = x;
 
@@ -125,7 +125,7 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
     T3 = c -> right;
 
     if (z->parent != NULL) {
-        if (z->parent->left == z)
+        if (strcmp(z->parent->left->element, z->element) == 0)
             z->parent->left = b;
         else
             z->parent->right = b;
