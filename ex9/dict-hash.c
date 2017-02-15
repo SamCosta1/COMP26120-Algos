@@ -7,7 +7,8 @@
 #include "speller.h"
 #include "dict.h"
 
-
+static float noCollisions = 0;
+static float avrgCollisions = 1;
 
 typedef struct
 { // hash-table entry
@@ -23,7 +24,7 @@ struct table
   cell *cells;
   Table_size table_size; // cell cells [table_size];
   Table_size num_entries; // number of cells in_use
-  // add anything else that you need
+
 };
 
 Table initialize_table (Table_size tsize) {
@@ -120,6 +121,8 @@ Boolean equals(Key_Type a, Key_Type b) {
    return strcmp(a,b) == 0;
 }
 
+
+
 Table insert (Key_Type key, Table t) {
     if (t->num_entries == t->table_size)
         return t;
@@ -167,39 +170,53 @@ Table insert (Key_Type key, Table t) {
    return t;
 }
 
+void updateAvarageCollisions() {
+   avrgCollisions += noCollisions;
+   avrgCollisions /= 2;
+}
 Boolean find (Key_Type key, Table t)
 {
-    cell *cells = t->cells;
-    int hashVal = hash(key, t->table_size);
-    // Try normal hash location
-    cell* hashCell = &cells[hashVal];
+   noCollisions = 0;
+   cell *cells = t->cells;
+   int hashVal = hash(key, t->table_size);
+   // Try normal hash location
+   cell* hashCell = &cells[hashVal];
 
-    if (hashCell->state == empty)
+   if (hashCell->state == empty) {
+      updateAvarageCollisions();
       return FALSE;
-
-    if (equals(key, hashCell->element))
-      return TRUE;
-
-    // Apply double hash until found or empty cell found
-    int i = 1;
-    Boolean stop = FALSE;
-
-    while (stop == FALSE) {
-      int newHash = (hashVal + i * secondaryHash(key, t->table_size))
-                    % t->table_size;
-
-
-      cell *hashCell = &cells[newHash];
-
-      if (equals(key, hashCell->element))
-         return TRUE;
-      else if (hashCell->state == empty)
-         stop = TRUE;
-
-      i++;
    }
 
-    return FALSE;
+
+   if (equals(key, hashCell->element)) {
+      updateAvarageCollisions();
+      return TRUE;
+   }
+
+
+   // Apply double hash until found or empty cell found
+   int i = 1;
+   Boolean stop = FALSE;
+   Boolean found = FALSE;
+
+   while (stop == FALSE) {
+   noCollisions++;
+   int newHash = (hashVal + i * secondaryHash(key, t->table_size))
+                 % t->table_size;
+
+
+   cell *hashCell = &cells[newHash];
+
+   if (equals(key, hashCell->element))
+      found = TRUE;
+   else if (hashCell->state == empty)
+      stop = TRUE;
+
+   i++;
+   }
+
+   updateAvarageCollisions();
+   return found;
 }
 
 void print_table (Table t)
@@ -213,6 +230,6 @@ void print_table (Table t)
     }
 }
 
-void print_stats (Table t)
-{
+void print_stats (Table t) {
+   printf("Avarage #Collisions per acces: %f\n", avrgCollisions);
 }
