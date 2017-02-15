@@ -27,7 +27,6 @@ struct table
 };
 
 Table initialize_table (Table_size tsize) {
-    printf("Table size = %d\n", tsize);
     Table table = malloc(sizeof(struct table));
     check(table);
     table->cells = malloc(sizeof(cell) * tsize);
@@ -205,7 +204,6 @@ Boolean find (Key_Type key, Table t)
 
 void print_table (Table t)
 {
-   printf("Printing");fflush(stdout);
     int i;
     cell *cells = t->cells;
     for (i = 0; i < t->table_size; i++) {
