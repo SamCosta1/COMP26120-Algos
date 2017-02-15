@@ -53,7 +53,17 @@ unsigned long fme(unsigned long primitiveRoot, unsigned long exponent,
     return accumulator;
 }
 
-int hash(Key_Type key, int size) {
+int hashBad(Key_Type key, int size) {
+    int hash = 0;
+    for (int i = 0; i < sizeof(key); i++) {
+        if (key[i] == 0) // ignoring trailing spaces
+            break;
+        hash += key[i];
+    }
+    return hash % size;
+}
+
+int hashBetter(Key_Type key, int size) {
     int hash = 0;
     for (int i = 0; i < sizeof(key); i++) {
         if (key[i] == 0) // ignoring trailing spaces
@@ -64,7 +74,17 @@ int hash(Key_Type key, int size) {
     return hash % size;
 }
 
+int hash(Key_Type key, int size) {
+    if (mode == 1)
+        return hashBetter(key, size);
+
+    return hashBad(key, size);
+}
+
 Table insert (Key_Type key, Table t) {
+    if (t->num_entries == t->table_size)
+        return t;
+
     int hashVal = hash(key, t->table_size);
 
     cell *cells = t->cells;

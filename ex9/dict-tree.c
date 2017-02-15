@@ -102,12 +102,9 @@ Boolean equals(tree_ptr a, tree_ptr b) {
 }
 
 tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
-    //printf("Restruc:  %s %s %s\n", x->element, y->element, z->element);
 
     if (equals(z->right, y)) {
         if (equals(y->right, x)) {
-        //    printf("(A), %s %s %s\n", x->element, y->element, z->element);
-            fflush(stdout);
             // (a)
             z->right = y->left;
             y->left = z;
@@ -131,8 +128,6 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
         }
 
         if (equals(y->left, x)) {
-            //printf("(C), %s %s %s\n", x->element, y->element, z->element);
-            fflush(stdout);
             // (c)
             z->right = x->left;
             y->left = x->right;
@@ -164,8 +159,6 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
 
     if (equals(z->left, y)) {
         if (equals(y->left, x)) {
-            //printf("(B), %s %s %s\n", x->element, y->element, z->element);
-            fflush(stdout);
             // (b)
             z->left = y->right;
             y->right = z;
@@ -190,8 +183,6 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
         }
 
         if (equals(y->right, x)) {
-        //    printf("(D), %s %s %s\n", x->element, y->element, z->element);
-            fflush(stdout);
             // (d)
             y->right = x->left;
             z->left = x->right;
@@ -219,75 +210,7 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
         }
     }
 
-//print("SHOULN'T BE HERE");
     return NULL;
-
-
-/*
-        if (strcmp(y->right->element, x->element) == 0) { // (a)
-            b = y;
-            c = x;
-
-            T1 = b->left;
-            T2 = c->left;
-        } else { // (c)
-            b = x;
-            c = y;
-
-            T1 = b -> left;
-            T2 = b -> right;
-        }
-    } else {
-        c = z;
-
-        if (strcmp(y->right->element, x->element) == 0) { // (d)
-            a = y;
-            b = x;
-
-            T1 = b -> left;
-            T2 = b -> right;
-        } else { // (b)
-            b = y;
-            a = x;
-
-            T1 = a -> right;
-            T2 = b -> right;
-        }
-    }
-
-    T0 = a -> left;
-    T3 = c -> right;
-
-    if (z->parent != NULL) {
-        if (strcmp(z->parent->left->element, z->element) == 0)
-            z->parent->left = b;
-        else
-            z->parent->right = b;
-    }
-
-    b->parent = z->parent;
-
-    b->left = a;
-    a->left = T0;
-    a->right = T1;
-
-    b->right = c;
-    c->left = T2;
-    c->right = T3;
-
-    setParent(a,b);
-    setParent(T0,a);
-    setParent(T1,a);
-    setParent(c,b);
-    setParent(T2,c);
-    setParent(T3,c);
-
-    a->height = 1 + max(getHeight(T0), getHeight(T1));
-    c->height = 1 + max(getHeight(T2), getHeight(T3));
-    b->height =  1 + max(getHeight(a), getHeight(c));
-
-
-    return b;*/
 }
 
 int nodeHeight(tree_ptr n) {
@@ -303,23 +226,12 @@ void rebalance(tree_ptr node, Table t) {
 
         if (abs(nodeHeight(node->left) - nodeHeight(node->right)) > 1) {
             tree_ptr  tallestChild = tallest(node);
-
-            //print("Before Restructure ---\n");
-            //print_tree_in_order(node);fflush(stdout);
-
             node = restructure(tallest(tallestChild), tallestChild, node);
 
-            //print("After restructure, node=%s\n", node->element);
-            //print_tree_in_order(node);
-            //print("---\n");
-            //fflush(stdout);
         }
     }
     t->head = node;
 
-    //print("Print table-------head = %s\n", node->element);
-    //print_tree_in_order(t->head);
-    //print("-");
 }
 
 void calculateHeight(tree_ptr node) {
@@ -372,7 +284,6 @@ Table insert(Key_Type word, Table table) {
 
 Boolean findInTree(Key_Type word, tree_ptr tree) {
     int compareVal = strcmp(tree->element, word);
-    //printf("word: |%s|, element: |%s|\n, compvak: %d", word, tree->element);
     numStringComps++;
 
     if (compareVal > 0) {
