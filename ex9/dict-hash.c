@@ -1,11 +1,13 @@
+#define _XOPEN_SOURCE 500
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #define __USE_BSD
 #include <string.h>
-
 #include "speller.h"
 #include "dict.h"
+
+
 
 typedef struct
 { // hash-table entry
@@ -30,6 +32,12 @@ Table initialize_table (Table_size tsize) {
     check(table);
     table->cells = malloc(sizeof(cell) * tsize);
     check(table->cells);
+
+    // Initialize all cells
+    for (int i = 0; i < tsize; i++) {
+      (&(table->cells)[i])->state = empty;
+      (&(table->cells)[i])->element = NULL;
+   }
 
     table->num_entries = 0;
     table->table_size = tsize;
@@ -81,7 +89,37 @@ int hash(Key_Type key, int size) {
     return hashBad(key, size);
 }
 
+void populateCell(Key_Type key, cell* theCell) {
+   theCell->state = in_use;
+   theCell->element = strdup(key);
+}
+
+int primes[] = {7, 47,  191, 569, 1217, 2411, 5437, 7919};
+int getPrimeLessThanValue(int value) {
+   if (value < 7)
+      return value - 1;
+
+   for (int i = 0; i < 8; i++)
+      if (primes[i] > value)
+         return primes[i-1];
+
+   // Should never happen
+   return 7;
+
+}
+
+int secondaryHash(Key_Type key, int size) {
+   int prime =  getPrimeLessThanValue(size);
+
+   return prime - (hash(key, size) % prime);
+}
+
+Boolean equals(Key_Type a, Key_Type b) {
+   return strcmp(a,b) == 0;
+}
+
 Table insert (Key_Type key, Table t) {
+   printf("key: %s \n", key);
     if (t->num_entries == t->table_size)
         return t;
 
@@ -90,19 +128,67 @@ Table insert (Key_Type key, Table t) {
     cell *cells = t->cells;
     cell *hashCell = &cells[hashVal];
 
-    if (hashCell->state == empty) {
-        hashCell->state = in_use;
-        hashCell->element = strdup(key);
 
+    if (hashCell->state == empty) {
+        populateCell(key, hashCell);
         t->num_entries++;
+        return t;
     }
 
-    return t;
+    // Ignore duplicates
+    if (equals(hashCell->element, key))
+      return t;
+    // Perform double hashing if no space found
+    int i = 1;
+    Boolean spaceFound = FALSE;
 
+    while (spaceFound == FALSE) {
+      int newHash = (hashVal + i * secondaryHash(key, t->table_size))
+                    % t->table_size;
+
+      cell *hashCell = &cells[newHash];
+
+
+      if (hashCell->state == empty) {
+         populateCell(key, hashCell);
+         t->num_entries++;
+         spaceFound = TRUE;
+      }
+
+      // Ignore duplicates
+      if (equals(hashCell->element, key))
+      return t;
+   }
+
+   return t;
 }
 
 Boolean find (Key_Type key, Table t)
 {
+    cell *cells = t->cells;
+    int hashVal = hash(key, t->table_size);
+
+    // Try normal hash location
+    cell* hashCell = &cells[hashVal];
+    if (equals(key, hashCell->element))
+      return TRUE;
+
+    // Apply double hash until found or empty cell found
+    int i = 1;
+    Boolean stop = FALSE;
+
+    while (stop == FALSE) {
+      int newHash = (hashVal + i * secondaryHash(key, t->table_size))
+                    % t->table_size;
+
+      cell *hashCell = &cells[newHash];
+
+      if (equals(key, hashCell->element))
+         return TRUE;
+      else if (hashCell->state != deleted)
+         stop = TRUE;
+   }
+
     return FALSE;
 }
 
