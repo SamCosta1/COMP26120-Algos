@@ -115,11 +115,13 @@ int secondaryHash(Key_Type key, int size) {
 }
 
 Boolean equals(Key_Type a, Key_Type b) {
+   if (a == NULL || b == NULL)
+      return FALSE;
+
    return strcmp(a,b) == 0;
 }
 
 Table insert (Key_Type key, Table t) {
-printf("Insert: %s\n", key);
     if (t->num_entries == t->table_size)
         return t;
 
@@ -150,7 +152,7 @@ printf("Insert: %s\n", key);
       cell *hashCell = &cells[newHash];
 
 
-      if (hashCell->state == empty) {
+      if (hashCell->state != in_use) {
          populateCell(key, hashCell);
          t->num_entries++;
          spaceFound = TRUE;
@@ -158,7 +160,9 @@ printf("Insert: %s\n", key);
 
       // Ignore duplicates
       if (equals(hashCell->element, key))
-      return t;
+         return t;
+
+      i++;
    }
 
    return t;
@@ -185,12 +189,15 @@ Boolean find (Key_Type key, Table t)
       int newHash = (hashVal + i * secondaryHash(key, t->table_size))
                     % t->table_size;
 
+
       cell *hashCell = &cells[newHash];
 
       if (equals(key, hashCell->element))
          return TRUE;
-      else if (hashCell->state != deleted)
+      else if (hashCell->state == empty)
          stop = TRUE;
+
+      i++;
    }
 
     return FALSE;
