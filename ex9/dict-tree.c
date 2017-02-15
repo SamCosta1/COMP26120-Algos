@@ -31,6 +31,20 @@ Table initialize_table(/*ignore parameter*/) {
     return table;
 }
 
+void print_tree_in_order(tree_ptr tree) {
+    if (tree == NULL)
+        return;
+
+    print_tree_in_order(tree->left);
+    printf("%s \n", tree->element);
+    fflush(stdout);
+    print_tree_in_order(tree->right);
+}
+
+void print_table(Table table) {
+    print_tree_in_order(table->head);
+}
+
 tree_ptr newNode(Key_Type element, tree_ptr parent, tree_ptr left, tree_ptr right) {
     tree_ptr new = malloc(sizeof(struct node));
     check(new);
@@ -60,8 +74,8 @@ tree_ptr tallest(tree_ptr node) {
     if (node == NULL)
         return NULL;
 
-    int leftHeight = node->left == NULL ? 0 : (node->left)->height;
-    int rightHeight = node->right == NULL ? 0 : (node->right)->height;
+    int leftHeight = node->left == NULL ? 0 : node->left->height;
+    int rightHeight = node->right == NULL ? 0 : node->right->height;
 
     if (leftHeight > rightHeight)
         return node->left;
@@ -78,18 +92,133 @@ int getHeight(tree_ptr node) {
     return node == NULL ? 0 : node -> height;
 }
 
+Boolean equals(tree_ptr a, tree_ptr b) {
+    if (a == NULL || b == NULL)
+        return 0;
+
+    return strcmp(a->element, b->element) == 0;
+}
+
 tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
-    tree_ptr T0;
-    tree_ptr T1;
-    tree_ptr T2;
-    tree_ptr T3;
-    tree_ptr a;
-    tree_ptr b;
-    tree_ptr c;
+    printf("Restruc:  %s %s %s\n", x->element, y->element, z->element);
 
-    if (strcmp(z->right->element, y->element) == 0) {
-        a = z;
+    if (equals(z->right, y)) {
+        if (equals(y->right, x)) {
+            printf("(A), %s %s %s\n", x->element, y->element, z->element);
+            fflush(stdout);
+            // (a)
+            z->right = y->left;
+            y->left = z;
 
+            if (z->parent != NULL) {
+                if (strcmp(z->parent->left->element, z->element) == 0)
+                    z->parent->left = y;
+                else
+                    z->parent->right = y;
+            }
+
+            z->height = 1 + maxNodes(z->left, z->right);
+            x->height = 1 + maxNodes(x->left, x->right);
+            y->height = 1 + maxNodes(y->left, y->right);
+
+
+            setParent(y, z->parent);
+            setParent(z, y);
+            setParent(z->right, z);
+            return y;
+        }
+
+        if (equals(y->left, x)) {
+            printf("(C), %s %s %s\n", x->element, y->element, z->element);
+            // (c)
+            z->right = x->left;
+            y->left = x->right;
+
+            x->left = z;
+            x->right = y;
+
+            z->height = 1 + maxNodes(z->left, z->right);
+            y->height = 1 + maxNodes(y->left, y->right);
+            x->height = 1 + maxNodes(x->left, x->right);
+
+            if (z->parent != NULL) {
+                if (strcmp(z->parent->left->element, z->element) == 0)
+                    z->parent->left = x;
+                else
+                    z->parent->right = x;
+            }
+
+            setParent(x, z->parent);
+            setParent(z, x);
+            setParent(y, x);
+            setParent(z->right, z);
+            setParent(y->left, y);
+
+
+            return x;
+        }
+    }
+
+    if (strcmp(z->left->element, y->element) == 0) {
+        if (strcmp(y->left->element, x->element) == 0) {
+            printf("(B), %s %s %s\n", x->element, y->element, z->element);
+            // (b)
+            z->left = y->right;
+            y->right = z;
+
+            if (z->parent != NULL) {
+                if (equals(z->parent->left, z))
+                    z->parent->left = y;
+                else
+                    z->parent->right = y;
+            }
+
+            z->height = 1 + maxNodes(z->left, z->right);
+            x->height = 1 + maxNodes(x->left, x->right);
+            y->height = 1 + maxNodes(y->left, y->right);
+
+            setParent(y, z->parent);
+            setParent(z, y);
+            setParent(z->left, z);
+            setParent(y->right, y);
+
+            return y;
+        }
+
+        if (strcmp(y->right->element, x->element) == 0) {
+            printf("(D), %s %s %s\n", x->element, y->element, z->element);
+            // (d)
+            y->right = x->left;
+            z->left = x->right;
+
+            x->right = z;
+            x->left = y;
+
+            if (z->parent != NULL) {
+                if (strcmp(z->parent->left->element, z->element) == 0)
+                    z->parent->left = x;
+                else
+                    z->parent->right = x;
+            }
+
+            z->height = 1 + maxNodes(z->left, z->right);
+            y->height = 1 + maxNodes(y->left, y->right);
+            x->height = 1 + maxNodes(x->left, x->right);
+
+            setParent(x, z->parent);
+            setParent(y, x);
+            setParent(z, x);
+            setParent(y->right, y);
+            setParent(z->left, z);
+            return x;
+        }
+    }
+
+printf("SHOULN'T BE HERE");
+    return NULL;
+
+
+/*
         if (strcmp(y->right->element, x->element) == 0) { // (a)
             b = y;
             c = x;
@@ -153,7 +282,7 @@ tree_ptr restructure(tree_ptr x, tree_ptr y, tree_ptr z) {
     b->height =  1 + max(getHeight(a), getHeight(c));
 
 
-    return b;
+    return b;*/
 }
 
 int nodeHeight(tree_ptr n) {
@@ -162,17 +291,26 @@ int nodeHeight(tree_ptr n) {
     return n->height;
 }
 
-void rebalance(tree_ptr node, tree_ptr tree) {
+void rebalance(tree_ptr node, Table t) {
 
     while (node->parent != NULL) {
         node = node->parent;
 
         if (abs(nodeHeight(node->left) - nodeHeight(node->right)) > 1) {
-            tree_ptr tallestChild = tallest(node);
+            tree_ptr  tallestChild = tallest(node);
+
+            printf("Before Restructure ---\n");
+            print_tree_in_order(node);fflush(stdout);
+
             node = restructure(tallest(tallestChild), tallestChild, node);
+
+            printf("After restructure, node=%s\n", node->element);
+            print_tree_in_order(node);
+            printf("---\n");
+            fflush(stdout);
         }
-        node->height = 1 + max(nodeHeight(node->left), nodeHeight(node->right));
     }
+    t->head = node;
 }
 
 void calculateHeight(tree_ptr node) {
@@ -182,30 +320,31 @@ void calculateHeight(tree_ptr node) {
         calculateHeight(node->parent);
 }
 
-void insertToTree(Key_Type word, tree_ptr tree) {
+void insertToTree(Key_Type word, tree_ptr tree, Table table) {
     int compareVal = strcmp(tree->element, word);
 
     if (compareVal > 0) {
         if (tree -> left != NULL)
-            insertToTree(word, tree->left);
+            insertToTree(word, tree->left, table);
         else {
             tree -> left = newNode(word, tree, NULL, NULL);
             calculateHeight(tree->left);
 
             if (mode == 1)
-                rebalance(tree, tree);
+                rebalance(tree->left, table);
         }
     }
 
+
     if (compareVal < 0) {
         if (tree -> right != NULL)
-            insertToTree(word, tree->right);
+            insertToTree(word, tree->right, table);
         else {
             tree -> right = newNode(word, tree, NULL, NULL);
             calculateHeight(tree->right);
 
             if (mode == 1)
-                rebalance(tree->right, tree);
+                rebalance(tree->right, table);
         }
     }
 }
@@ -215,7 +354,7 @@ Table insert(Key_Type word, Table table) {
     if (table->head == NULL) {
         table -> head = newNode(word, NULL, NULL, NULL);
     } else {
-        insertToTree(word, table->head);
+        insertToTree(word, table->head, table);
     }
 
     return table;
@@ -257,22 +396,12 @@ Boolean find(Key_Type word, Table table) {
     return result;
 }
 
-void print_tree_in_order(tree_ptr tree) {
-    if (tree == NULL)
-        return;
 
-    print_tree_in_order(tree->left);
-    printf("%s \n", tree->element);
-    fflush(stdout);
-    print_tree_in_order(tree->right);
-}
-
-void print_table(Table table) {
-    print_tree_in_order(table->head);
-}
 
 void print_stats (Table table) {
     printf("Avarage #String compares in find: %d\n", averageStringComps);
     printf("Height: %d\n", table->head->height);
+
+
 
 }
