@@ -119,7 +119,7 @@ Boolean equals(Key_Type a, Key_Type b) {
 }
 
 Table insert (Key_Type key, Table t) {
-   printf("key: %s \n", key);
+printf("Insert: %s\n", key);
     if (t->num_entries == t->table_size)
         return t;
 
@@ -138,6 +138,7 @@ Table insert (Key_Type key, Table t) {
     // Ignore duplicates
     if (equals(hashCell->element, key))
       return t;
+
     // Perform double hashing if no space found
     int i = 1;
     Boolean spaceFound = FALSE;
@@ -167,9 +168,12 @@ Boolean find (Key_Type key, Table t)
 {
     cell *cells = t->cells;
     int hashVal = hash(key, t->table_size);
-
     // Try normal hash location
     cell* hashCell = &cells[hashVal];
+
+    if (hashCell->state == empty)
+      return FALSE;
+
     if (equals(key, hashCell->element))
       return TRUE;
 
@@ -194,6 +198,7 @@ Boolean find (Key_Type key, Table t)
 
 void print_table (Table t)
 {
+   printf("Printing");fflush(stdout);
     int i;
     cell *cells = t->cells;
     for (i = 0; i < t->table_size; i++) {
