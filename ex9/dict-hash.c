@@ -8,7 +8,7 @@
 #include "dict.h"
 
 static float totalCollisins = 0;
-static float avrgCollisions = 1;
+static float avrgCollisions = 0;
 
 typedef struct
 { // hash-table entry
@@ -45,6 +45,7 @@ Table initialize_table (Table_size tsize) {
     return table;
 }
 
+int primes[] = {7, 47,  191, 569, 1217, 2411, 5437, 7919};
 unsigned long fme(unsigned long primitiveRoot, unsigned long exponent,
                   unsigned long prime) {
     unsigned long d = primitiveRoot;
@@ -77,7 +78,7 @@ int hashBetter(Key_Type key, int size) {
         if (key[i] == 0) // ignoring trailing spaces
             break;
 
-        hash += (int) fme(key[i], i + 1, size);
+        hash += (int) fme(key[i], primes[i % 8], size);
     }
     return hash % size;
 }
@@ -94,7 +95,6 @@ void populateCell(Key_Type key, cell* theCell) {
    theCell->element = strdup(key);
 }
 
-int primes[] = {7, 47,  191, 569, 1217, 2411, 5437, 7919};
 int getPrimeLessThanValue(int value) {
    if (value < 7)
       return value - 1;
@@ -129,8 +129,9 @@ void updateAvarageCollisions(int totalForRun) {
 //----------------------------------------------------
 
 
+
 Table insert (Key_Type key, Table t) {
-    if (t->num_entries == t->table_size)
+    if (t->num_entries == t->table_size - 1)
         return t;
 
     int hashVal = hash(key, t->table_size);
