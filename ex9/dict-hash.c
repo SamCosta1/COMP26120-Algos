@@ -7,7 +7,7 @@
 #include "speller.h"
 #include "dict.h"
 
-static float noCollisions = 0;
+static float totalCollisins = 0;
 static float avrgCollisions = 1;
 
 typedef struct
@@ -121,6 +121,12 @@ Boolean equals(Key_Type a, Key_Type b) {
    return strcmp(a,b) == 0;
 }
 
+// Gathering stats helper function -----------------
+void updateAvarageCollisions(int totalForRun) {
+   avrgCollisions += totalForRun;
+   avrgCollisions /= 2;
+}
+//----------------------------------------------------
 
 
 Table insert (Key_Type key, Table t) {
@@ -134,9 +140,10 @@ Table insert (Key_Type key, Table t) {
 
 
     if (hashCell->state == empty) {
-        populateCell(key, hashCell);
-        t->num_entries++;
-        return t;
+      updateAvarageCollisions(0); // Gathering stats
+      populateCell(key, hashCell);
+      t->num_entries++;
+      return t;
     }
 
     // Ignore duplicates
@@ -162,36 +169,34 @@ Table insert (Key_Type key, Table t) {
 
       // Ignore duplicates
       if (equals(hashCell->element, key))
-         return t;
+         spaceFound = TRUE;
 
       i++;
    }
 
+   // Gatherin Stats ----------------
+   totalCollisins += i-1;
+   updateAvarageCollisions(i-1);
+   // -------------------------------
+
    return t;
 }
 
-void updateAvarageCollisions() {
-   avrgCollisions += noCollisions;
-   avrgCollisions /= 2;
-}
 Boolean find (Key_Type key, Table t)
 {
-   noCollisions = 0;
    cell *cells = t->cells;
    int hashVal = hash(key, t->table_size);
    // Try normal hash location
    cell* hashCell = &cells[hashVal];
 
-   if (hashCell->state == empty) {
-      updateAvarageCollisions();
+   if (hashCell->state == empty)
       return FALSE;
-   }
 
 
-   if (equals(key, hashCell->element)) {
-      updateAvarageCollisions();
+
+   if (equals(key, hashCell->element))
       return TRUE;
-   }
+
 
 
    // Apply double hash until found or empty cell found
@@ -200,22 +205,19 @@ Boolean find (Key_Type key, Table t)
    Boolean found = FALSE;
 
    while (stop == FALSE) {
-   noCollisions++;
-   int newHash = (hashVal + i * secondaryHash(key, t->table_size))
-                 % t->table_size;
+      int newHash = (hashVal + i * secondaryHash(key, t->table_size))
+                    % t->table_size;
 
 
-   cell *hashCell = &cells[newHash];
+      cell *hashCell = &cells[newHash];
 
-   if (equals(key, hashCell->element))
-      found = TRUE;
-   else if (hashCell->state == empty)
-      stop = TRUE;
+      if (equals(key, hashCell->element))
+         found = TRUE;
+      else if (hashCell->state == empty)
+         stop = TRUE;
 
-   i++;
+      i++;
    }
-
-   updateAvarageCollisions();
    return found;
 }
 
@@ -232,4 +234,5 @@ void print_table (Table t)
 
 void print_stats (Table t) {
    printf("Avarage #Collisions per acces: %f\n", avrgCollisions);
+   printf("Total Collisions: %f\n", totalCollisins);
 }
