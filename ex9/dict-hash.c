@@ -7,8 +7,9 @@
 #include "speller.h"
 #include "dict.h"
 
-static float totalCollisins = 0;
-static float avrgCollisions = 0;
+static float totalCollisions = 0;
+Boolean double_hash = FALSE;
+static int prime = 7;
 
 typedef struct
 { // hash-table entry
@@ -27,6 +28,21 @@ struct table
 
 };
 
+int primes[] = {7, 47, 191, 569, 1217, 2411, 5437, 7919, 15073, 24767, 40519, 999983};
+int numPrimes = 12;
+int getPrimeLessThanValue(int value) {
+   if (value < 7)
+      return value - 1;
+
+   for (int i = 0; i < numPrimes; i++)
+      if (value < primes[i])
+         return primes[i-1];
+
+   // Should never happen
+   return primes[numPrimes - 1];
+
+}
+
 Table initialize_table (Table_size tsize) {
     Table table = malloc(sizeof(struct table));
     check(table);
@@ -42,10 +58,13 @@ Table initialize_table (Table_size tsize) {
     table->num_entries = 0;
     table->table_size = tsize;
 
+    prime =  getPrimeLessThanValue(tsize);
+printf("prime: %d %d\n",prime, tsize);
+
     return table;
 }
 
-int primes[] = {7, 47,  191, 569, 1217, 2411, 5437, 7919};
+
 unsigned long fme(unsigned long primitiveRoot, unsigned long exponent,
                   unsigned long prime) {
     unsigned long d = primitiveRoot;
@@ -72,13 +91,14 @@ int hashBad(Key_Type key, int size) {
     return hash % size;
 }
 
+
 int hashBetter(Key_Type key, int size) {
     int hash = 0;
     for (int i = 0; i < sizeof(key); i++) {
         if (key[i] == 0) // ignoring trailing spaces
             break;
 
-        hash += (int) fme(key[i], primes[i % 8], size);
+        hash += (int) key[i] * fme(37, sizeof(key) - i, size);
     }
     return hash % size;
 }
@@ -95,21 +115,12 @@ void populateCell(Key_Type key, cell* theCell) {
    theCell->element = strdup(key);
 }
 
-int getPrimeLessThanValue(int value) {
-   if (value < 7)
-      return value - 1;
 
-   for (int i = 0; i < 8; i++)
-      if (primes[i] > value)
-         return primes[i-1];
-
-   // Should never happen
-   return 7;
-
-}
 
 int secondaryHash(Key_Type key, int size) {
-   int prime =  getPrimeLessThanValue(size);
+
+   if (!double_hash)
+       return 1;
 
    return prime - (hash(key, size) % prime);
 }
@@ -121,36 +132,8 @@ Boolean equals(Key_Type a, Key_Type b) {
    return strcmp(a,b) == 0;
 }
 
-// Gathering stats helper function -----------------
-void updateAvarageCollisions(int totalForRun) {
-   avrgCollisions += totalForRun;
-   avrgCollisions /= 2;
-}
-//----------------------------------------------------
 
-
-
-Table insert (Key_Type key, Table t) {
-    if (t->num_entries == t->table_size - 1)
-        return t;
-
-    int hashVal = hash(key, t->table_size);
-
-    cell *cells = t->cells;
-    cell *hashCell = &cells[hashVal];
-
-
-    if (hashCell->state == empty) {
-      updateAvarageCollisions(0); // Gathering stats
-      populateCell(key, hashCell);
-      t->num_entries++;
-      return t;
-    }
-
-    // Ignore duplicates
-    if (equals(hashCell->element, key))
-      return t;
-
+void doubleHash(Key_Type key, int hashVal, cell* cells, Table t) {
     // Perform double hashing if no space found
     int i = 1;
     Boolean spaceFound = FALSE;
@@ -161,27 +144,81 @@ Table insert (Key_Type key, Table t) {
 
       cell *hashCell = &cells[newHash];
 
+       // Ignore duplicates
+       if (equals(hashCell->element, key)) {
+           return;
+       }
 
       if (hashCell->state != in_use) {
          populateCell(key, hashCell);
          t->num_entries++;
          spaceFound = TRUE;
       }
-
-      // Ignore duplicates
-      if (equals(hashCell->element, key))
-         spaceFound = TRUE;
-
       i++;
    }
 
-   // Gatherin Stats ----------------
-   totalCollisins += i-1;
-   updateAvarageCollisions(i-1);
-   // -------------------------------
+  // Gathering Stats ----------------
+  totalCollisions++;
+  // -------------------------------
+}
+
+void linearProbing(Key_Type key, int hashVal, cell* cells, Table t) {
+    // Perform double hashing if no space found
+    int i = 1;
+    Boolean spaceFound = FALSE;
+
+    while (spaceFound == FALSE) {
+      int newHash = (hashVal + i) % t->table_size;
+
+      cell *hashCell = &cells[newHash];
+
+       // Ignore duplicates
+       if (equals(hashCell->element, key)) {
+           return;
+       }
+
+      if (hashCell->state != in_use) {
+         populateCell(key, hashCell);
+         t->num_entries++;
+         spaceFound = TRUE;
+      }
+      i++;
+   }
+
+  // Gathering Stats ----------------
+  totalCollisions++;
+  // -------------------------------
+}
+
+Table insert (Key_Type key, Table t) {
+    if (t->num_entries == t->table_size - 1)
+        return t;
+
+    int hashVal = hash(key, t->table_size);
+    cell *cells = t->cells;
+    cell *hashCell = &cells[hashVal];
+
+
+    if (hashCell->state != in_use) {
+      populateCell(key, hashCell);
+
+      t->num_entries++;
+      return t;
+    }
+
+    // Ignore duplicates
+    if (equals(hashCell->element, key))
+      return t;
+
+   if (double_hash)
+       doubleHash(key, hashVal, cells, t);
+   else
+       linearProbing(key, hashVal, cells, t);
 
    return t;
 }
+
+
 
 Boolean find (Key_Type key, Table t)
 {
@@ -193,12 +230,8 @@ Boolean find (Key_Type key, Table t)
    if (hashCell->state == empty)
       return FALSE;
 
-
-
    if (equals(key, hashCell->element))
       return TRUE;
-
-
 
    // Apply double hash until found or empty cell found
    int i = 1;
@@ -234,6 +267,6 @@ void print_table (Table t)
 }
 
 void print_stats (Table t) {
-   printf("Avarage #Collisions per acces: %f\n", avrgCollisions);
-   printf("Total Collisions: %f\n", totalCollisins);
+   printf("Avarage #Collisions per acces: %f\n", totalCollisions / t->num_entries);
+   printf("Total Collisions: %f\n", totalCollisions);
 }
