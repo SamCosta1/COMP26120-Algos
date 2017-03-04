@@ -13,7 +13,7 @@ int Nitems;    // number of items available
 int *item_weights;  // vector of item weights
 int *item_values;  // vector of item profits or values
 int *temp_indexes;  // list of temporary item indexes for sorting items by value/weight
-int QUIET=0; // this can be set to 1 to suppress output
+int QUIET=1; // this can be set to 1 to suppress output
 
 extern void read_knapsack_instance(char *filename);
 extern void print_instance();
@@ -26,8 +26,21 @@ int main(int argc, char *argv[])
 {
   read_knapsack_instance(argv[1]);
   print_instance();
+  
   enumerate();
   return(0);
+}
+
+void print_result(int* best_solution, int best_value){    
+    printf("Optimal Solution: \n");
+    printf("Best Value: %d\n", best_value);
+    printf("Pack: ");
+    
+    int i;
+    for (i = 1; i <= Nitems; i++)
+        if(best_solution[i] == 1)
+            printf("%d ", i);
+    printf("\n");
 }
 
 void enumerate()
@@ -41,33 +54,50 @@ void enumerate()
   int i;  // item index
   int solution[Nitems+1];   // (binary) solution vector representing items packed
   int best_solution[Nitems+1];  // (binary) solution vector for best solution found
-  int best_value; // total value packed in the best solution
-  double j=0;
+  int best_value; // total value packed in the best solution  
   int total_value, total_weight; // total value and total weight of current knapsack solution
   int infeasible;  // 0 means feasible; -1 means infeasible (violates the capacity constraint)
+  int progress_bar_size;
+  int progress_bar_piece;
 
   // set the knapsack initially empty
-  for(i=1;i<=Nitems;i++)
-    {
-      solution[i]=0;
-    }
-  QUIET=1;
-  best_value=0;
-
- while(!(next_binary(&solution[1], Nitems)))
-    {
-
-      /* ADD CODE IN HERE TO KEEP TRACK OF FRACTION OF ENUMERATION DONE */
-
-          // calculates the value and weight and feasibility:
-      infeasible=check_evaluate_and_print_sol(solution, &total_value, &total_weight);  
-      /* ADD CODE IN HERE TO KEEP TRACK OF BEST SOLUTION FOUND*/
+    for(i=1;i<=Nitems;i++)  {
+      solution[i]=0;     
+      best_solution[i]=0;
 
     }
- /* ADD CODE TO PRINT OUT BEST SOLUTION */
+  
+    QUIET=1;
+    best_value=0;
+    progress_bar_size = 100;
+    progress_bar_piece = (int)(pow(2,Nitems) / (float)progress_bar_size);
+    
+    printf("|-");
+    int count = 0;
+    while(!(next_binary(&solution[1], Nitems)))   {
+      
+      // Print out a piece of progress bar every progress_bar_piece interval
+      if (count % progress_bar_piece == 0) {
+          printf("-");
+          fflush(stdout);
+      }          
+      count++;
+
+      // calculates the value and weight and feasibility:
+      infeasible = check_evaluate_and_print_sol(solution, &total_value, &total_weight);  
+   
+      if (infeasible == 0 && total_value > best_value) {      
+        best_value = total_value;
+                
+        for (i = 1; i <= Nitems; i++)           
+           best_solution[temp_indexes[i]] = solution[i] == 1 ? 1 : 0;   
+      }
+    }
+    printf("-|\n"); // End of progress bar
+    
+    print_result(best_solution, best_value);
 
 }
-
 
 int next_binary(int *str, int Nitems)
 {

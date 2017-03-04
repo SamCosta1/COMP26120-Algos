@@ -136,29 +136,20 @@ int check_evaluate_and_print_sol(int *sol, int *total_value, int *total_weight)
 
   // First pass: unmap the mapping using pack[.]
   for(i=1;i<=Nitems;i++)
-    {
-      if(sol[i]==1)
-        {
-	  pack[temp_indexes[i]]=1;
-        }
-      else
-        {
-	  pack[temp_indexes[i]]=0;
-        }
-    }
+    pack[temp_indexes[i]] = sol[i] == 1 ? 1 : 0;
+    
 
   // Second pass: now print out item numbers of items to be packed in ascending order
-  if(!(QUIET))
-    {
-      printf("Pack items: ");
-    }
+  if(!(QUIET))    
+      printf("\nPack items: ");
+    
   for(i=1;i<=Nitems;i++)
     {
       if(pack[i]==1)
 	{
 	  if(!(QUIET))
 	    {
-	      printf("%d ", i);
+	      printf("%d ", i);fflush(stdout);
             }
 	  *total_value+=item_values[i];
 	  *total_weight+=item_weights[i];
