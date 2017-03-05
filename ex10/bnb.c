@@ -27,11 +27,11 @@ int QUIET=0;     // can be set to 1 to suppress output
 // the structure for a solution. All of this will be stored in the priority queue
 typedef struct solution_structure
 {
-  int solution_vec[NITEMS+1];  // binary solution vector; 
+  int solution_vec[NITEMS+1];  // binary solution vector;
   //e.g. solution_vec[1]=1 means first item is packed in knapsack.
-  //     solution_vec[1]=0 means first item is NOT in knapsack. 
+  //     solution_vec[1]=0 means first item is NOT in knapsack.
   // NB: solution_vec[0] is meaningless.
-  
+
   int val;               // its value
   int fixed;             // the number of items that are fixed to either 0 or 1, not '*'
   double bound;          // the upper bound value of the solution
@@ -54,7 +54,7 @@ void upheap(int qsize)
 
   struc_sol temp_element;
   temp_element=pqueue[qsize]; pqueue[0].bound=DOUB_MAX;
-  
+
   while (pqueue[qsize/2].bound<=temp_element.bound)
     {
       pqueue[qsize]=pqueue[qsize/2]; qsize=qsize/2;
@@ -100,7 +100,7 @@ struc_sol removeMax()
 
 void print_sol(struc_sol *sol)
 {
-  // prints a solution in the form 000100xxxx etc 
+  // prints a solution in the form 000100xxxx etc
   // with x's denoting the part of the solution not yet fixed (determined)
 
   int i;
@@ -111,35 +111,35 @@ void print_sol(struc_sol *sol)
     {
       printf("x");
       i++;
-    }    
+    }
   printf("\n");
 }
 
 void frac_bound(struc_sol *sol, int fix)
 {
-  // Updates the values sol->val and sol->bound                                 
+  // Updates the values sol->val and sol->bound
 
-  // Computes the fractional knapsack upper bound                               
-  // given a binary vector of items (sol->solution_vec),                        
-  // where the first                                                            
-  // "fix" of them are fixed. All that must be done                             
-  // is compute the value of the fixed part; then                               
-  // add to that the value obtained by adding in                                
-  // items beyond the fixed part until the capacity                             
-  // is exceeded. For the exceeded capacity, the fraction                       
-  // of the last item added which would just fill the knapsack                  
-  // is taken. This fraction of profit/value is added to the                    
-  // total. This is the required upper bound.                                   
+  // Computes the fractional knapsack upper bound
+  // given a binary vector of items (sol->solution_vec),
+  // where the first
+  // "fix" of them are fixed. All that must be done
+  // is compute the value of the fixed part; then
+  // add to that the value obtained by adding in
+  // items beyond the fixed part until the capacity
+  // is exceeded. For the exceeded capacity, the fraction
+  // of the last item added which would just fill the knapsack
+  // is taken. This fraction of profit/value is added to the
+  // total. This is the required upper bound.
 
-  // Everything above assumes items are sorted in decreasing                    
-  // profit/weight ratio                                                        
+  // Everything above assumes items are sorted in decreasing
+  // profit/weight ratio
 
   int i;
-  double totalp=0; // profit total                                              
-  int totalw=0; // weight total                                                 
+  double totalp=0; // profit total
+  int totalw=0; // weight total
   sol->val=-1;
 
-  // compute the current value and weight of the fixed part                     
+  // compute the current value and weight of the fixed part
   for(i=1;i<=fix;i++)
     {
       if(sol->solution_vec[i]==1)
@@ -149,14 +149,14 @@ void frac_bound(struc_sol *sol, int fix)
         }
     }
   if(totalw>Capacity) // if fixed part infeasible, return
-    {                       
+    {
       return;
     }
 
   sol->val=totalp;
-  //  printf("%g %d\n", totalp, totalw);                                        
+  //  printf("%g %d\n", totalp, totalw);
 
-  // add in items the rest of the items until capacity is exceeded              
+  // add in items the rest of the items until capacity is exceeded
   i=fix+1;
   do
     {
@@ -165,8 +165,8 @@ void frac_bound(struc_sol *sol, int fix)
       i++;
     } while((i<=Nitems)&&(totalw<Capacity));
 
-  /* if over-run the capacity, adjust profit total by subtracting 
-     that overrun fraction of the last item  */                                                     
+  /* if over-run the capacity, adjust profit total by subtracting
+     that overrun fraction of the last item  */
   if(totalw>Capacity)
     {
       --i;
@@ -185,9 +185,9 @@ int main(int argc, char *argv[1])
   read_knapsack_instance(argv[1]);
 
   assert(NITEMS>=Nitems);
- 
+
   if((final_sol = (int *)malloc((Nitems+1)*sizeof(int)))==NULL)
-    {      
+    {
       fprintf(stderr,"Problem allocating solution vector final_sol\n");
       exit(1);
     }
@@ -195,7 +195,7 @@ int main(int argc, char *argv[1])
   sort_by_ratio();
 
   if((pqueue = (struc_sol *)malloc(sizeof(struc_sol)*SIZE))==NULL)
-    {      
+    {
       fprintf(stderr,"Problem allocating memory for priority queue. Reduce SIZE.\n");
       exit(1);
     }
@@ -206,39 +206,84 @@ int main(int argc, char *argv[1])
   return(0);
 }
 
+struc_sol *createChild (struc_sol* parent, int toAdd) {
+   struc_sol *child = malloc(sizeof(struc_sol));
+   copy_array(parent->solution_vec, child->solution_vec);
+   child->fixed = parent->fixed + 1;
+
+   child->solution_vec[child->fixed] = toAdd;
+
+   return child;
+}
+
 
 void branch_and_bound(int *final_sol)
 {
-  // branch and bound
+   // branch and bound
 
-  // start with the empty solution vector
-  // compute its value and its bound
-  // put current_best = to its value
-  // store it in the priority queue
-  
-  // LOOP until queue is empty or upper bound is not greater than current_best:
-  //   remove the first item in the queue
-  //   construct two children, 1 with a 1 added, 1 with a O added
-  //   FOREACH CHILD:
-  //     if infeasible, discard child
-  //     else
-  //       compute the value and bound
-  //       if value > current_best, set current_best to it, and copy child to final_sol
-  //       add child to the queue
-  // RETURN
-  
+   // start with the empty solution vector
+   // compute its value and its bound
+   // put current_best = to its value
+   // store it in the priority queue
+   struc_sol empty;
+   int child;
+   copy_array(final_sol, empty.solution_vec);
+   empty.fixed = 0;
+   frac_bound(&empty, 0);
 
-  /* YOUR CODE GOES HERE */
+   int current_best = empty.val;
+   insert(empty);
+
+   while (QueueSize > 0 && empty.bound >= current_best) {
+      struc_sol item = removeMax();
+
+      struc_sol *children[2];
+      children[0] = createChild(&item, 1);
+      children[1] = createChild(&item, 0);
+
+      for (child = 0; child < 2; child++) {
+         if (children[child]->fixed >= Nitems)
+            continue;
+
+         frac_bound(children[child], children[child]->fixed);
+         printf("Fixed %d, Val %d\n",children[child]->fixed, children[child]->val);
+
+         if (children[child]->val == -1) // Ignore the infeasible ones
+            continue;
+
+         if (children[child]->val > current_best) {
+            current_best = children[child]->val;
+            copy_array(children[child]->solution_vec, final_sol);
+         }
+
+         insert(*children[child]);
+      }
+
+   }
+
+   // LOOP until queue is empty or upper bound is not greater than current_best:
+   //   remove the first item in the queue
+   //   construct two children, 1 with a 1 added, 1 with a O added
+   //   FOREACH CHILD:
+   //     if infeasible, discard child
+   //     else
+   //       compute the value and bound
+   //       if value > current_best, set current_best to it, and copy child to final_sol
+   //       add child to the queue
+   // RETURN
+
+
+   /* YOUR CODE GOES HERE */
 
 }
-  
+
 
 void copy_array(int *from, int *to)
 {
-  // This copies Nitems elements of one integer array to another. 
+  // This copies Nitems elements of one integer array to another.
   // Notice it should be called with "to" and "from" pointing to the first, not the
   // zeroth, element of the solution_vec array
-  
+
   int i;
   for(i=0;i<Nitems;i++)
     {
