@@ -242,14 +242,15 @@ void branch_and_bound(int *final_sol)
       children[1] = createChild(&item, 0);
 
       for (child = 0; child < 2; child++) {
+
          if (children[child]->fixed >= Nitems)
             continue;
 
          frac_bound(children[child], children[child]->fixed);
-         printf("Fixed %d, Val %d\n",children[child]->fixed, children[child]->val);
 
-         if (children[child]->val == -1) // Ignore the infeasible ones
+         if (children[child]->val == -1)
             continue;
+
 
          if (children[child]->val > current_best) {
             current_best = children[child]->val;

@@ -25,6 +25,7 @@ void sort_by_ratio();
 int check_evaluate_and_print_sol(int *sol,  int *total_value, int *total_weight);
 static int mycomp(const void *a, const void *b);
 
+
 void read_knapsack_instance(char *filename)
 {
   // Note: knapsack items in the input files are numbered from 1 to N.
@@ -137,12 +138,12 @@ int check_evaluate_and_print_sol(int *sol, int *total_value, int *total_weight)
   // First pass: unmap the mapping using pack[.]
   for(i=1;i<=Nitems;i++)
     pack[temp_indexes[i]] = sol[i] == 1 ? 1 : 0;
-    
+
 
   // Second pass: now print out item numbers of items to be packed in ascending order
-  if(!(QUIET))    
+  if(!(QUIET))
       printf("\nPack items: ");
-    
+
   for(i=1;i<=Nitems;i++)
     {
       if(pack[i]==1)
