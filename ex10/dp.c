@@ -72,7 +72,8 @@ int DP(int *v,int *wv, int n, int W, int *solution) {
    // main dynamic programming loops , adding one item at a time and looping through weights from 0 to W
    for (i = 1; i <= n; i++)
       for(w = 0; w <= W; w++) {
-         int withThisVal = v[i] + V[i - 1][w - wv[i]];
+
+         int withThisVal = v[i] + V[i - 1][  w > wv[i] ? 0 : w - wv[i]  ];
 
          if (wv[i] <= w && withThisVal > V [i-1][w]) {
             V[i][w] = withThisVal;
@@ -90,7 +91,7 @@ int DP(int *v,int *wv, int n, int W, int *solution) {
       if (keep[i][K] == 1)
          K -= wv[i];
    }
-   
+
    return V[n][W];
 
 }

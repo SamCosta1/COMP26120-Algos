@@ -234,7 +234,7 @@ void branch_and_bound(int *final_sol)
    int current_best = empty.val;
    insert(empty);
 
-   while (QueueSize > 0 && empty.bound >= current_best) {
+   while (QueueSize > 0 && empty.bound > current_best) {
       struc_sol item = removeMax();
 
       struc_sol *children[2];
