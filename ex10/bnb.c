@@ -216,6 +216,10 @@ struc_sol *createChild (struc_sol* parent, int toAdd) {
    return child;
 }
 
+void discardChild(struc_sol *child) {
+    free(child);
+}
+
 
 void branch_and_bound(int *final_sol)
 {
@@ -230,37 +234,48 @@ void branch_and_bound(int *final_sol)
    copy_array(final_sol, empty.solution_vec);
    empty.fixed = 0;
    frac_bound(&empty, 0);
-
+   int bound = empty.bound;
    int current_best = empty.val;
    insert(empty);
 
-   while (QueueSize > 0 && empty.bound > current_best) {
+   while (QueueSize > 0 && bound > current_best) {
       struc_sol item = removeMax();
 
+
       struc_sol *children[2];
-      children[0] = createChild(&item, 1);
-      children[1] = createChild(&item, 0);
+      children[0] = createChild(&item, 0);
+      children[1] = createChild(&item, 1);
 
       for (child = 0; child < 2; child++) {
 
-         if (children[child]->fixed >= Nitems)
+         if (children[child]->fixed >= Nitems) {
+            discardChild(children[child]);
             continue;
+        }
 
          frac_bound(children[child], children[child]->fixed);
 
-         if (children[child]->val == -1)
+         if (children[child]->val == -1){
+            discardChild(children[child]);
             continue;
-
+         }
 
          if (children[child]->val > current_best) {
             current_best = children[child]->val;
             copy_array(children[child]->solution_vec, final_sol);
+            bound = children[child]->bound;
          }
-
          insert(*children[child]);
       }
-
-   }
+  }
+/*
+  for (child = 0; child < 703490; child++) {
+      struc_sol *children[2];
+      children[0] = createChild(&empty, 1);
+      children[1] = createChild(&empty, 0);
+      copy_array(children[0]->solution_vec, final_sol);
+      copy_array(children[1]->solution_vec, final_sol);
+  }*/
 
    // LOOP until queue is empty or upper bound is not greater than current_best:
    //   remove the first item in the queue
