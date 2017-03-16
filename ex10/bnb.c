@@ -233,7 +233,10 @@ void branch_and_bound(int *final_sol)
    int child;
    copy_array(final_sol, empty.solution_vec);
    empty.fixed = 0;
+
+   
    frac_bound(&empty, 0);
+
    int bound = empty.bound;
    int current_best = empty.val;
    insert(empty);
@@ -251,7 +254,7 @@ void branch_and_bound(int *final_sol)
          if (children[child]->fixed >= Nitems) {
             discardChild(children[child]);
             continue;
-        }
+         }
 
          frac_bound(children[child], children[child]->fixed);
 
