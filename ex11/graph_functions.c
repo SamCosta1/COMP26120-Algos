@@ -15,10 +15,14 @@ int initialize_graph (Graph *myGraph, int maxSize) {
 int insert_graph_node (Graph *myGraph, int n, char *name) {
    myGraph->table[n].name = strdup(name);
    myGraph->table[n].outdegree = 0;
+   myGraph->table[n].indegree = 0;
 
+   return 0;
 }
 
+
 int insert_graph_link (Graph *myGraph, int source, int target) {
+
    if (myGraph->table[source].outlist == NULL) {
       myGraph->table[source].outlist = malloc(sizeof(List));
       memoryCheck(myGraph->table[source].outlist);
@@ -27,7 +31,10 @@ int insert_graph_link (Graph *myGraph, int source, int target) {
    else
       insertToLinkedList(myGraph->table[source].outlist, target);
 
+   myGraph->table[target].indegree++;
    myGraph->table[source].outdegree++;
+
+   return 0;
 }
 
 

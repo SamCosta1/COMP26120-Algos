@@ -13,6 +13,7 @@ typedef struct { // a Node of a Graph
   char *name;
   List *outlist; // adjacency list
   int outdegree; // length of outlist
+  int indegree; // Number of nodes pointing to this one
   //double pagerank_score; //not needed for this exercise
 } Node;
 
