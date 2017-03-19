@@ -14,6 +14,7 @@ int initialize_graph (Graph *myGraph, int maxSize) {
 
 int insert_graph_node (Graph *myGraph, int n, char *name) {
    myGraph->table[n].name = strdup(name);
+   myGraph->table[n].index = n;
    myGraph->table[n].outdegree = 0;
    myGraph->table[n].indegree = 0;
 

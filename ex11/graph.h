@@ -3,6 +3,8 @@
 #include <ctype.h>
 #define __USE_BSD // make prototype for strdup visible
 #include <string.h>
+#define FALSE 0
+#define TRUE 1
 
 typedef struct linkedlist { // linked list of ints (for use in Node)
   int index ;
@@ -14,6 +16,7 @@ typedef struct { // a Node of a Graph
   List *outlist; // adjacency list
   int outdegree; // length of outlist
   int indegree; // Number of nodes pointing to this one
+  int index;
   //double pagerank_score; //not needed for this exercise
 } Node;
 
@@ -29,4 +32,5 @@ extern int initialize_graph (Graph *mygraph, int MaxSize);
 extern int insert_graph_node (Graph *mygraph, int n, char *name);
 extern int insert_graph_link (Graph *mygraph, int source, int target);
 extern int read_graph (Graph *mygraph, char *filename);
+extern void searchFromNode(int index, Graph *mygraph);
 extern void print_graph (Graph *mygraph);
