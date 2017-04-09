@@ -128,17 +128,17 @@ void print_graph (Graph *mygraph)
  */
 {
   int i;
-  List *current;
+  //List *current;
   printf ("MAX %d\n", mygraph->maxSize - 1);
   for (i=0; i<mygraph->maxSize; i++)
     if (mygraph->table[i].name!=NULL)
     {
-      printf ("NODE %d %s\n", i, mygraph->table[i].name);
-      current= mygraph->table[i].outlist;
+      printf ("NODE %d %s, DISTANCE: %d\n", i, mygraph->table[i].name, mygraph->table[i].distanceKey);
+      /*current= mygraph->table[i].outlist;
       while (current!=NULL)
       {
         printf ("EDGE %d %d\n", i, current->index);
         current= current->next;
-     }
+     }*/
   }
 }

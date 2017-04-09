@@ -46,10 +46,10 @@ void addChildren(int index, Graph *graph) {
     }
 }
 
-void searchFromNode(int index, Graph *graph) {
+void dijkstra(int index, Graph *graph) {
   
     initExploredList(graph->maxSize);
-    initHeap();
+    initHeap(graph);
     graph->table[index].distanceKey = 0;
     push(index);
     addToExploredList(index);

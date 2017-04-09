@@ -33,5 +33,5 @@ extern int initialize_graph (Graph *mygraph, int MaxSize);
 extern int insert_graph_node (Graph *mygraph, int n, char *name);
 extern int insert_graph_link (Graph *mygraph, int source, int target);
 extern int read_graph (Graph *mygraph, char *filename);
-extern void searchFromNode(int index, Graph *mygraph);
+extern void dijkstra(int index, Graph *mygraph);
 extern void print_graph (Graph *mygraph);
