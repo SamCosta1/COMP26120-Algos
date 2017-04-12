@@ -26,6 +26,11 @@ void initExploredList(int maxSize) {
     exploredList = malloc(maxSize * sizeof(int));
 }
 
+void initGraphDistances(Graph* graph) {
+    for (int i = 0; i < graph->maxSize; i++)
+        graph->table[i].distanceKey = -1;
+}
+
 int lessThan(int node, int adjNode) {
     // -1 denotes infinity 
     if (adjNode == -1)
@@ -35,6 +40,8 @@ int lessThan(int node, int adjNode) {
 }
 
 void addChildren(int index, Graph *graph) {
+    if (index < 0)
+        return;
     List *current = graph->table[index].outlist;
     while (current!=NULL) {
         if (!isInExploredList(current->index) && lessThan(graph->table[index].distanceKey + 1, graph->table[current->index].distanceKey)) {
@@ -50,6 +57,7 @@ void dijkstra(int index, Graph *graph) {
   
     initExploredList(graph->maxSize);
     initHeap(graph);
+    initGraphDistances(graph);
     graph->table[index].distanceKey = 0;
     push(index);
     addToExploredList(index);

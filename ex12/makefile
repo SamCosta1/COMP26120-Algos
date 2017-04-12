@@ -5,7 +5,7 @@ HEADERS=graph.h search-data-structure.h
 
 %.o: $(HEADERS)
 
-part1: part1.o graph_functions.o
+part1: part1.o graph_functions.o graph_search.o datastructure.o
 
 part2: part2.o graph_functions.o graph_search.o datastructure.o
 

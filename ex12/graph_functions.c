@@ -87,7 +87,7 @@ int read_graph (Graph *mygraph, char *filename) {
     fprintf(stderr,"cannot open file %s\n", filename);
     return -1;
   }
-  printf ("Reading graph from %s\n", filename);
+  //printf ("Reading graph from %s\n", filename);
   fscanf (fp,"%s", command);
   if (strcmp (command, "MAX")!=0)
   {
@@ -129,7 +129,7 @@ void print_graph (Graph *mygraph)
 {
   int i;
   //List *current;
-  printf ("MAX %d\n", mygraph->maxSize - 1);
+  //printf ("MAX %d\n", mygraph->maxSize - 1);
   for (i=0; i<mygraph->maxSize; i++)
     if (mygraph->table[i].name!=NULL)
     {
