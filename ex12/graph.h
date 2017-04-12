@@ -35,3 +35,7 @@ extern int insert_graph_link (Graph *mygraph, int source, int target);
 extern int read_graph (Graph *mygraph, char *filename);
 extern void dijkstra(int index, Graph *mygraph);
 extern void print_graph (Graph *mygraph);
+
+extern void addToExploredList(int index);
+extern int isInExploredList(int index);
+extern void initExploredList(int maxSize);

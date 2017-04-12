@@ -5,7 +5,7 @@ int main(int argc,char *argv[]) {
   Graph myGraph;
   read_graph(&myGraph,argv[1]);
 
-  dijkstra(19, &myGraph);
+  dijkstra(1, &myGraph);
   print_graph(&myGraph);
   
   return(0);
