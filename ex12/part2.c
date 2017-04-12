@@ -3,6 +3,9 @@
 void print_path(List *path) {
    while (path != NULL) {
      printf("%d ", path->index);
+
+     if (path->index == -1)
+        printf("\nNo Path was found :( ");
      
      path = path->next;
 
@@ -32,17 +35,23 @@ void addToPath(List* path, int node) {
    current->next->index = node;
 }
 
-int max(List* outlist) {
+int max(List* outlist, Graph* graph) {
    List* current = outlist;
    int max = -1;
+   int maxIndex = -1;
    while (current->next != NULL) {
-      if (max < current->index)
-         max = current->index;
+      if (isInExploredList(current->index)) {
+        current = current->next;
+        continue;
+      }
+
+      if (max < graph->table[current->index].outdegree)
+         maxIndex = current->index;
       
       current = current->next;
    }
 
-   return max;
+   return maxIndex;
 }
 
 List* pathFind(int source, int target, Graph* graph) {
@@ -54,9 +63,11 @@ List* pathFind(int source, int target, Graph* graph) {
     int current = source;
 
     while (!isAdjacentTo(current, target, graph) 
-              && graph->table[current].outdegree > 0
-              && !isInExploredList(current)) {
-       int next = max(graph->table[current].outlist);
+              && graph->table[current].outdegree > 0) {
+       int next = max(graph->table[current].outlist, graph);
+
+       if (next < 0) // Can't find path
+          break;
 
        addToExploredList(next);
        addToPath(path, next);
@@ -75,10 +86,9 @@ int main(int argc,char *argv[]) {
   Graph myGraph;
   read_graph(&myGraph,argv[1]);
   
-  List* path = pathFind(1, 700, &myGraph);
+  List* path = pathFind(712, 9, &myGraph);
 
   print_path(path);
   
   return(0);
-
 }
