@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#define __USE_BSD // make prototype for strdup visible
+
 #include <string.h>
 #define FALSE 0
 #define TRUE 1

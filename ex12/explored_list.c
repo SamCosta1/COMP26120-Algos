@@ -18,4 +18,5 @@ int isInExploredList(int index) {
 
 void initExploredList(int maxSize) {
     exploredList = malloc(maxSize * sizeof(int));
+    endptr = 0;
 }

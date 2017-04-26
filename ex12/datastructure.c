@@ -63,10 +63,12 @@ void downheap_bubble() {
 
 }
 
-
 void initHeap(Graph *graph) {
     h.size = 0;
-    h.arr = malloc(sizeof(int) * graph->maxSize);
+    h.arr = malloc(sizeof(int) * graph->maxSize); 
+   
+    memoryCheck(h.arr);    
+
     h.graph = graph;
     for (int i = 0; i < graph->maxSize; i++) {
         h.arr[i] = -1;
@@ -76,7 +78,6 @@ void initHeap(Graph *graph) {
 int sizeOfStructure() {
     return h.size;  
 }
-
 
 int pop() {
     int min = h.arr[0];
