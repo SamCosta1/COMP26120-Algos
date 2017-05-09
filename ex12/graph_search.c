@@ -46,5 +46,5 @@ void dijkstra(int index, Graph *graph) {
         int top = pop();              
 
         addChildren(top, graph); // Add the children of the node to the datastructure
-     }   
+    }   
 }

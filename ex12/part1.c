@@ -3,6 +3,7 @@
 int isSmallWorldNetwork(Graph *graph) {
     int maxDistance = 0; //  Maximum non infinate distance
     for (int i = 1; i < graph->maxSize; i++) {
+       // printf("Running: %d\n", i); fflush(stdout);
         dijkstra(i, graph);
         for (int j = 1; j < graph->maxSize; j++) {
             if (graph->table[j].distanceKey > maxDistance)

@@ -86,7 +86,7 @@ int main(int argc,char *argv[]) {
   Graph myGraph;
   read_graph(&myGraph,argv[1]);
   
-  List* path = pathFind(712, 9, &myGraph);
+  List* path = pathFind(12, 50, &myGraph);
 
   print_path(path);
   
